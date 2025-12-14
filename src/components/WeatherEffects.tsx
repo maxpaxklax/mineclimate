@@ -57,22 +57,28 @@ export function WeatherEffects({ condition, isVisible }: WeatherEffectsProps) {
   if (!isVisible) return null;
 
   return (
-    <div className="absolute inset-0 z-[6] pointer-events-none overflow-hidden">
+    <div className="absolute inset-0 z-[15] pointer-events-none overflow-hidden">
       {/* Floating clouds - show for overcast, rainy, snowy */}
       {(condition === 'overcast' || condition === 'rainy' || condition === 'snowy') && (
         <div className="absolute inset-0">
           {clouds.map((cloud) => (
-            <CloudSVG
+            <div
               key={cloud.id}
-              className="absolute text-white/30 w-24 md:w-32 animate-cloud-drift"
+              className="absolute animate-cloud-drift"
               style={{
                 top: `${cloud.top}%`,
                 animationDelay: `${-cloud.delay}s`,
                 animationDuration: `${cloud.duration}s`,
-                transform: `scale(${cloud.scale})`,
-                opacity: cloud.opacity,
               }}
-            />
+            >
+              <CloudSVG
+                className="text-white/40 w-24 md:w-32"
+                style={{
+                  transform: `scale(${cloud.scale})`,
+                  opacity: cloud.opacity,
+                }}
+              />
+            </div>
           ))}
         </div>
       )}
@@ -81,17 +87,23 @@ export function WeatherEffects({ condition, isVisible }: WeatherEffectsProps) {
       {condition === 'sunny' && (
         <div className="absolute inset-0">
           {clouds.slice(0, 2).map((cloud) => (
-            <CloudSVG
+            <div
               key={cloud.id}
-              className="absolute text-white/20 w-16 md:w-24 animate-cloud-drift"
+              className="absolute animate-cloud-drift"
               style={{
                 top: `${cloud.top}%`,
                 animationDelay: `${-cloud.delay}s`,
                 animationDuration: `${cloud.duration + 20}s`,
-                transform: `scale(${cloud.scale * 0.7})`,
-                opacity: cloud.opacity * 0.5,
               }}
-            />
+            >
+              <CloudSVG
+                className="text-white/20 w-16 md:w-24"
+                style={{
+                  transform: `scale(${cloud.scale * 0.7})`,
+                  opacity: cloud.opacity * 0.5,
+                }}
+              />
+            </div>
           ))}
         </div>
       )}

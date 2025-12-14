@@ -244,8 +244,6 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
             }}
           />
           
-          {/* Weather effects overlay */}
-          <WeatherEffects condition={condition} isVisible={imageLoaded && scale < 1.5} />
           
           {/* Text overlay - positioned to overlap image on mobile */}
           <div 
@@ -284,6 +282,11 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
             </p>
           </div>
         </div>
+      )}
+      
+      {/* Weather effects overlay - outside pinch container for proper z-index */}
+      {imageUrl && (
+        <WeatherEffects condition={condition} isVisible={imageLoaded && scale < 1.5} />
       )}
       
       {isGenerating && imageUrl && (
