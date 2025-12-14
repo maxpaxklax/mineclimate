@@ -11,6 +11,7 @@ export interface WeatherData {
 export interface LocationData {
   city: string;
   country: string;
+  admin1?: string;
   latitude: number;
   longitude: number;
 }
@@ -94,8 +95,8 @@ export async function fetchWeather(latitude: number, longitude: number): Promise
   };
 }
 
-export async function searchCity(query: string): Promise<LocationData | null> {
-  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=1&language=en&format=json`;
+export async function searchCities(query: string): Promise<LocationData[]> {
+  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=5&language=en&format=json`;
   
   const response = await fetch(url);
   if (!response.ok) {
@@ -105,16 +106,16 @@ export async function searchCity(query: string): Promise<LocationData | null> {
   const data = await response.json();
   
   if (!data.results || data.results.length === 0) {
-    return null;
+    return [];
   }
   
-  const result = data.results[0];
-  return {
+  return data.results.map((result: any) => ({
     city: result.name,
     country: result.country || '',
+    admin1: result.admin1 || '',
     latitude: result.latitude,
     longitude: result.longitude,
-  };
+  }));
 }
 
 export async function reverseGeocode(latitude: number, longitude: number): Promise<LocationData> {

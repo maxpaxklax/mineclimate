@@ -3,7 +3,6 @@ import { toast } from 'sonner';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { 
   fetchWeather, 
-  searchCity, 
   reverseGeocode, 
   WeatherData, 
   LocationData 
@@ -155,23 +154,15 @@ const Index = () => {
       });
   }, [geolocation.loading, geolocation.latitude, geolocation.longitude, geolocation.error, loadWeatherAndImage]);
 
-  const handleSearch = useCallback(async (query: string) => {
+  const handleSelectLocation = useCallback(async (loc: LocationData) => {
     setIsLoading(true);
+    setShowPermission(false);
     
     try {
-      const loc = await searchCity(query);
-      
-      if (!loc) {
-        toast.error('City not found');
-        setIsLoading(false);
-        return;
-      }
-
-      setShowPermission(false);
       await loadWeatherAndImage(loc);
     } catch (e) {
-      console.error('Search failed:', e);
-      toast.error('Failed to search city');
+      console.error('Failed to load location:', e);
+      toast.error('Failed to load weather for location');
       setIsLoading(false);
     }
   }, [loadWeatherAndImage]);
@@ -187,7 +178,7 @@ const Index = () => {
     return (
       <LocationPermission 
         error={geolocation.error || ''} 
-        onSearch={handleSearch}
+        onSelectLocation={handleSelectLocation}
         isLoading={isLoading}
       />
     );
@@ -208,7 +199,7 @@ const Index = () => {
       )}
       
       <SearchBar 
-        onSearch={handleSearch}
+        onSelectLocation={handleSelectLocation}
         onRefresh={handleRefresh}
         imageUrl={imageUrl}
         isLoading={isGenerating || isLoading}
