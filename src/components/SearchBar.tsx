@@ -199,15 +199,15 @@ export function SearchBar({ onSearch, onRefresh, imageUrl, isLoading, city, temp
           </form>
         ) : (
           <div className="flex items-center justify-between">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-10 w-10"
-              onClick={() => setIsSearchOpen(true)}
+            <button
+              type="button"
+              onClick={() => !isLoading && setIsSearchOpen(true)}
               disabled={isLoading}
+              className="flex flex-1 items-center gap-3 rounded-xl px-3 py-2 text-left text-muted-foreground transition-colors hover:bg-secondary/50 disabled:opacity-50"
             >
-              <Search className="h-5 w-5" />
-            </Button>
+              <Search className="h-5 w-5 shrink-0" />
+              <span className="text-sm">Search for a city...</span>
+            </button>
             
             <div className="flex gap-1">
               <Button
