@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { Loader2, Sun, Cloud, CloudRain, Snowflake } from 'lucide-react';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { format } from 'date-fns';
 
 interface CityImageProps {
@@ -78,6 +78,80 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Pinch zoom state
+  const [scale, setScale] = useState(1);
+  const [translate, setTranslate] = useState({ x: 0, y: 0 });
+  const initialDistance = useRef<number | null>(null);
+  const initialScale = useRef(1);
+  const lastTouch = useRef<{ x: number; y: number } | null>(null);
+
+  const getDistance = (touches: React.TouchList) => {
+    const touch1 = touches.item(0);
+    const touch2 = touches.item(1);
+    if (!touch1 || !touch2) return 0;
+    return Math.hypot(
+      touch1.clientX - touch2.clientX,
+      touch1.clientY - touch2.clientY
+    );
+  };
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      initialDistance.current = getDistance(e.touches);
+      initialScale.current = scale;
+    } else if (e.touches.length === 1 && scale > 1) {
+      lastTouch.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+      };
+    }
+  }, [scale]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2 && initialDistance.current !== null) {
+      e.preventDefault();
+      const currentDistance = getDistance(e.touches);
+      const newScale = Math.min(Math.max(initialScale.current * (currentDistance / initialDistance.current), 1), 4);
+      setScale(newScale);
+      
+      // Reset translate when zooming out to 1
+      if (newScale === 1) {
+        setTranslate({ x: 0, y: 0 });
+      }
+    } else if (e.touches.length === 1 && scale > 1 && lastTouch.current) {
+      e.preventDefault();
+      const deltaX = e.touches[0].clientX - lastTouch.current.x;
+      const deltaY = e.touches[0].clientY - lastTouch.current.y;
+      
+      setTranslate(prev => ({
+        x: prev.x + deltaX,
+        y: prev.y + deltaY,
+      }));
+      
+      lastTouch.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+      };
+    }
+  }, [scale]);
+
+  const handleTouchEnd = useCallback(() => {
+    initialDistance.current = null;
+    lastTouch.current = null;
+  }, []);
+
+  // Double tap to reset
+  const lastTap = useRef<number>(0);
+  const handleDoubleTap = useCallback((e: React.TouchEvent) => {
+    const now = Date.now();
+    if (now - lastTap.current < 300) {
+      setScale(1);
+      setTranslate({ x: 0, y: 0 });
+    }
+    lastTap.current = now;
+  }, []);
   
   const WeatherIcon = condition ? weatherIcons[condition] : null;
   const today = format(new Date(), 'EEEE, MMMM d');
@@ -146,19 +220,34 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
       )}
       
       {imageUrl ? (
-        <>
+        <div
+          ref={containerRef}
+          className="relative h-full w-full touch-none"
+          onTouchStart={(e) => {
+            handleDoubleTap(e);
+            handleTouchStart(e);
+          }}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
           <img
             ref={imgRef}
             src={imageUrl}
             alt={`Isometric city view of ${city}`}
             className={cn(
-              "relative z-[5] h-full w-full object-contain transition-opacity duration-500",
+              "relative z-[5] h-full w-full object-contain transition-transform duration-100",
               isGenerating && "opacity-60"
             )}
+            style={{
+              transform: `scale(${scale}) translate(${translate.x / scale}px, ${translate.y / scale}px)`,
+            }}
           />
           
           {/* Text overlay - positioned to overlap image on mobile */}
-          <div className="absolute inset-x-0 top-[15%] md:top-8 z-20 flex flex-col items-center text-center pointer-events-none">
+          <div 
+            className="absolute inset-x-0 top-[15%] md:top-8 z-20 flex flex-col items-center text-center pointer-events-none transition-opacity duration-200"
+            style={{ opacity: scale > 1.5 ? 0 : 1 }}
+          >
             <h1 className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
               {city}
             </h1>
@@ -174,7 +263,7 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
               </p>
             )}
           </div>
-        </>
+        </div>
       ) : imageError ? (
         <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20">
           <div className="text-center">
