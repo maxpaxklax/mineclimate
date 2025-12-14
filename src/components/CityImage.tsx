@@ -86,6 +86,8 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
   const [translate, setTranslate] = useState({ x: 0, y: 0 });
   const initialDistance = useRef<number | null>(null);
   const initialScale = useRef(1);
+  const initialTranslate = useRef({ x: 0, y: 0 });
+  const initialCenter = useRef({ x: 0, y: 0 });
   const lastTouch = useRef<{ x: number; y: number } | null>(null);
 
   const getDistance = (touches: React.TouchList) => {
@@ -98,29 +100,63 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
     );
   };
 
+  const getCenter = (touches: React.TouchList) => {
+    const touch1 = touches.item(0);
+    const touch2 = touches.item(1);
+    if (!touch1 || !touch2) return { x: 0, y: 0 };
+    return {
+      x: (touch1.clientX + touch2.clientX) / 2,
+      y: (touch1.clientY + touch2.clientY) / 2,
+    };
+  };
+
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (e.touches.length === 2) {
       initialDistance.current = getDistance(e.touches);
       initialScale.current = scale;
+      initialTranslate.current = { ...translate };
+      initialCenter.current = getCenter(e.touches);
     } else if (e.touches.length === 1 && scale > 1) {
       lastTouch.current = {
         x: e.touches[0].clientX,
         y: e.touches[0].clientY,
       };
     }
-  }, [scale]);
+  }, [scale, translate]);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (e.touches.length === 2 && initialDistance.current !== null) {
+    if (e.touches.length === 2 && initialDistance.current !== null && containerRef.current) {
       e.preventDefault();
       const currentDistance = getDistance(e.touches);
+      const currentCenter = getCenter(e.touches);
       const newScale = Math.min(Math.max(initialScale.current * (currentDistance / initialDistance.current), 1), 4);
-      setScale(newScale);
       
-      // Reset translate when zooming out to 1
+      // Calculate the focal point offset
+      const rect = containerRef.current.getBoundingClientRect();
+      const containerCenterX = rect.width / 2;
+      const containerCenterY = rect.height / 2;
+      
+      // Point in container where pinch started (relative to container center)
+      const pinchStartX = initialCenter.current.x - rect.left - containerCenterX;
+      const pinchStartY = initialCenter.current.y - rect.top - containerCenterY;
+      
+      // Current pinch center (relative to container center)
+      const pinchCurrentX = currentCenter.x - rect.left - containerCenterX;
+      const pinchCurrentY = currentCenter.y - rect.top - containerCenterY;
+      
+      // Scale change
+      const scaleChange = newScale / initialScale.current;
+      
+      // New translation: adjust for scale change around pinch point + pan movement
+      const newTranslateX = pinchCurrentX - pinchStartX * scaleChange + initialTranslate.current.x * scaleChange;
+      const newTranslateY = pinchCurrentY - pinchStartY * scaleChange + initialTranslate.current.y * scaleChange;
+      
       if (newScale === 1) {
         setTranslate({ x: 0, y: 0 });
+      } else {
+        setTranslate({ x: newTranslateX, y: newTranslateY });
       }
+      setScale(newScale);
     } else if (e.touches.length === 1 && scale > 1 && lastTouch.current) {
       e.preventDefault();
       const deltaX = e.touches[0].clientX - lastTouch.current.x;
