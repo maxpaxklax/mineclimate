@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Search, Share2, Download, RefreshCw, Loader2, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { searchCities, LocationData } from '@/lib/weather';
@@ -257,35 +258,52 @@ export function SearchBar({ onSelectLocation, onRefresh, imageUrl, isLoading, ci
               <span className="text-sm">Search for a city...</span>
             </button>
             
-            <div className="flex gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-10 w-10"
-                onClick={handleDownload}
-                disabled={!imageUrl || isLoading}
-              >
-                <Download className="h-5 w-5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-10 w-10"
-                onClick={onRefresh}
-                disabled={!imageUrl || isLoading}
-              >
-                <RefreshCw className={`h-5 w-5 ${isLoading ? 'animate-spin' : ''}`} />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-10 w-10"
-                onClick={handleShare}
-                disabled={!imageUrl || isLoading}
-              >
-                <Share2 className="h-5 w-5" />
-              </Button>
-            </div>
+            <TooltipProvider>
+              <div className="flex gap-1">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-10 w-10"
+                      onClick={handleDownload}
+                      disabled={!imageUrl || isLoading}
+                    >
+                      <Download className="h-5 w-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Download</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-10 w-10"
+                      onClick={onRefresh}
+                      disabled={!imageUrl || isLoading}
+                    >
+                      <RefreshCw className={`h-5 w-5 ${isLoading ? 'animate-spin' : ''}`} />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Regenerate</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-10 w-10"
+                      onClick={handleShare}
+                      disabled={!imageUrl || isLoading}
+                    >
+                      <Share2 className="h-5 w-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Share</TooltipContent>
+                </Tooltip>
+              </div>
+            </TooltipProvider>
           </div>
         )}
       </div>
