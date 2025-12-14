@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
 import { useGeolocation } from '@/hooks/useGeolocation';
-import { useCredits } from '@/hooks/useCredits';
 import { 
   fetchWeather, 
   searchCity, 
@@ -20,18 +18,15 @@ import { CityImage } from '@/components/CityImage';
 import { WeatherCard } from '@/components/WeatherCard';
 import { SearchBar } from '@/components/SearchBar';
 import { LocationPermission } from '@/components/LocationPermission';
-import { CreditsModal } from '@/components/CreditsModal';
 
 const Index = () => {
   const geolocation = useGeolocation();
-  const { credits, freeRefreshesLeft, canRefresh, useRefresh, refreshCredits, user } = useCredits();
   const [location, setLocation] = useState<LocationData | null>(null);
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showPermission, setShowPermission] = useState(false);
-  const [showCreditsModal, setShowCreditsModal] = useState(false);
 
   const generateImage = useCallback(async (loc: LocationData, w: WeatherData) => {
     setIsGenerating(true);
@@ -184,47 +179,9 @@ const Index = () => {
   const handleRefresh = useCallback(async () => {
     if (!location || !weather) return;
     
-    const refreshCheck = canRefresh();
-    
-    if (!refreshCheck.allowed) {
-      if (refreshCheck.needsAuth) {
-        toast.error('Sign in to get more refreshes');
-        setShowCreditsModal(true);
-        return;
-      }
-      if (refreshCheck.needsCredits) {
-        toast.error('Out of credits! Buy more to continue.');
-        setShowCreditsModal(true);
-        return;
-      }
-      return;
-    }
-
-    const used = await useRefresh();
-    if (!used) {
-      toast.error('Failed to use refresh');
-      return;
-    }
-    
     await clearCache();
     await generateImage(location, weather);
-  }, [location, weather, generateImage, canRefresh, useRefresh]);
-
-  // Check for payment success in URL
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const payment = params.get('payment');
-    
-    if (payment === 'success') {
-      toast.success('Payment successful! Credits added to your account.');
-      refreshCredits();
-      // Clean up URL
-      window.history.replaceState({}, '', window.location.pathname);
-    } else if (payment === 'cancelled') {
-      toast.info('Payment cancelled');
-      window.history.replaceState({}, '', window.location.pathname);
-    }
-  }, [refreshCredits]);
+  }, [location, weather, generateImage]);
 
   if (showPermission) {
     return (
@@ -253,22 +210,11 @@ const Index = () => {
       <SearchBar 
         onSearch={handleSearch}
         onRefresh={handleRefresh}
-        onOpenCredits={() => setShowCreditsModal(true)}
         imageUrl={imageUrl}
         isLoading={isGenerating || isLoading}
         city={location?.city || 'your city'}
         temperature={weather?.temperature}
         condition={weather?.condition}
-        freeRefreshesLeft={freeRefreshesLeft}
-        credits={credits}
-      />
-
-      <CreditsModal
-        open={showCreditsModal}
-        onOpenChange={setShowCreditsModal}
-        currentCredits={credits}
-        user={user}
-        freeRefreshesLeft={freeRefreshesLeft}
       />
     </div>
   );
