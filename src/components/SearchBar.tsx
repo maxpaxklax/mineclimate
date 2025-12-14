@@ -107,36 +107,11 @@ export function SearchBar({ onSelectLocation, onRefresh, imageUrl, isLoading, ci
     ctx.fillStyle = 'white';
     ctx.textAlign = 'center';
 
-    let currentY = 40 * scale;
-
-    // 1. City name (large, bold)
+    // City name only (large, bold, centered at top)
     if (city) {
       const cityFontSize = 28 * scale;
       ctx.font = `700 ${cityFontSize}px system-ui, -apple-system, sans-serif`;
-      ctx.fillText(city, centerX, currentY);
-      currentY += cityFontSize * 1.2;
-    }
-
-    // 2. Weather emoji (larger)
-    if (condition) {
-      const emojiFontSize = 48 * scale;
-      ctx.font = `${emojiFontSize}px system-ui, sans-serif`;
-      ctx.fillText(weatherEmojis[condition] || '', centerX, currentY + emojiFontSize * 0.3);
-      currentY += emojiFontSize * 1.1;
-    }
-
-    // 3. Date
-    const today = format(new Date(), 'EEEE, MMMM d');
-    const dateFontSize = 14 * scale;
-    ctx.font = `500 ${dateFontSize}px system-ui, -apple-system, sans-serif`;
-    ctx.fillText(today, centerX, currentY);
-    currentY += dateFontSize * 1.6;
-
-    // 4. Temperature (prominent)
-    if (temperature !== undefined) {
-      const tempFontSize = 36 * scale;
-      ctx.font = `600 ${tempFontSize}px system-ui, -apple-system, sans-serif`;
-      ctx.fillText(`${Math.round(temperature)}°C`, centerX, currentY);
+      ctx.fillText(city, centerX, 40 * scale);
     }
 
     // Branding at bottom right
