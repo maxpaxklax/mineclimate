@@ -128,4 +128,65 @@
       transform: translateY(0);
     }
   }
+
+  /* Weather animation effects */
+  .animate-cloud-drift {
+    animation: cloud-drift linear infinite;
+  }
+
+  @keyframes cloud-drift {
+    from {
+      left: -15%;
+    }
+    to {
+      left: 110%;
+    }
+  }
+
+  .animate-rain-fall {
+    animation: rain-fall linear infinite;
+  }
+
+  @keyframes rain-fall {
+    0% {
+      top: -5%;
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
+      top: 105%;
+      opacity: 0;
+    }
+  }
+
+  .animate-snow-fall {
+    animation: snow-fall ease-in-out infinite;
+  }
+
+  @keyframes snow-fall {
+    0% {
+      top: -5%;
+      opacity: 0;
+      transform: translateX(0);
+    }
+    10% {
+      opacity: 0.8;
+    }
+    50% {
+      transform: translateX(20px);
+    }
+    90% {
+      opacity: 0.8;
+    }
+    100% {
+      top: 105%;
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+  }
 }
