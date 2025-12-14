@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Share2, Download, RefreshCw, Coins } from 'lucide-react';
+import { Search, Share2, Download, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -8,14 +8,11 @@ import { format } from 'date-fns';
 interface SearchBarProps {
   onSearch: (city: string) => void;
   onRefresh: () => void;
-  onOpenCredits: () => void;
   imageUrl: string | null;
   isLoading: boolean;
   city?: string;
   temperature?: number;
   condition?: 'sunny' | 'rainy' | 'snowy' | 'overcast';
-  freeRefreshesLeft: number;
-  credits: number;
 }
 
 const weatherEmojis: Record<string, string> = {
@@ -25,7 +22,7 @@ const weatherEmojis: Record<string, string> = {
   overcast: '☁️',
 };
 
-export function SearchBar({ onSearch, onRefresh, onOpenCredits, imageUrl, isLoading, city, temperature, condition, freeRefreshesLeft, credits }: SearchBarProps) {
+export function SearchBar({ onSearch, onRefresh, imageUrl, isLoading, city, temperature, condition }: SearchBarProps) {
   const [query, setQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -101,7 +98,6 @@ export function SearchBar({ onSearch, onRefresh, onOpenCredits, imageUrl, isLoad
     
     // Draw weather icon (sun emoji as brand icon)
     const brandTextWidth = ctx.measureText(brandText).width;
-    const totalWidth = iconSize + iconGap + brandTextWidth;
     const startX = canvas.width - padding - brandTextWidth;
     const brandY = canvas.height - padding;
     
@@ -203,29 +199,15 @@ export function SearchBar({ onSearch, onRefresh, onOpenCredits, imageUrl, isLoad
           </form>
         ) : (
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-10 w-10"
-                onClick={() => setIsSearchOpen(true)}
-                disabled={isLoading}
-              >
-                <Search className="h-5 w-5" />
-              </Button>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-10 gap-1.5 px-3"
-                onClick={onOpenCredits}
-              >
-                <Coins className="h-4 w-4" />
-                <span className="text-xs font-medium">
-                  {freeRefreshesLeft > 0 ? `${freeRefreshesLeft} free` : credits}
-                </span>
-              </Button>
-            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10"
+              onClick={() => setIsSearchOpen(true)}
+              disabled={isLoading}
+            >
+              <Search className="h-5 w-5" />
+            </Button>
             
             <div className="flex gap-1">
               <Button
