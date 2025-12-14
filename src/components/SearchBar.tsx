@@ -96,57 +96,65 @@ export function SearchBar({ onSelectLocation, onRefresh, imageUrl, isLoading, ci
     // Draw base image
     ctx.drawImage(img, 0, 0);
 
-    // Configure text style
-    const scale = img.width / 400; // Scale based on image size
-    ctx.textAlign = 'center';
-    ctx.fillStyle = 'white';
-    
-    // Add text shadow effect
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
-    ctx.shadowBlur = 8 * scale;
-    ctx.shadowOffsetY = 2 * scale;
-
+    // Scale based on image size (assuming ~400px base width)
+    const scale = img.width / 400;
     const centerX = canvas.width / 2;
-    const fontSize = 18 * scale;
-    ctx.font = `600 ${fontSize}px system-ui, sans-serif`;
 
-    // Line 1: City • ☀️ • 25°C
-    const line1Parts: string[] = [];
-    if (city) line1Parts.push(city);
-    if (condition) line1Parts.push(weatherEmojis[condition] || '');
-    if (temperature !== undefined) line1Parts.push(`${Math.round(temperature)}°C`);
-    
-    // Line 2: Date
+    // Text shadow for all text
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+    ctx.shadowBlur = 12 * scale;
+    ctx.shadowOffsetY = 2 * scale;
+    ctx.fillStyle = 'white';
+    ctx.textAlign = 'center';
+
+    let currentY = 40 * scale;
+
+    // 1. City name (large, bold)
+    if (city) {
+      const cityFontSize = 28 * scale;
+      ctx.font = `700 ${cityFontSize}px system-ui, -apple-system, sans-serif`;
+      ctx.fillText(city, centerX, currentY);
+      currentY += cityFontSize * 1.2;
+    }
+
+    // 2. Weather emoji (larger)
+    if (condition) {
+      const emojiFontSize = 48 * scale;
+      ctx.font = `${emojiFontSize}px system-ui, sans-serif`;
+      ctx.fillText(weatherEmojis[condition] || '', centerX, currentY + emojiFontSize * 0.3);
+      currentY += emojiFontSize * 1.1;
+    }
+
+    // 3. Date
     const today = format(new Date(), 'EEEE, MMMM d');
+    const dateFontSize = 14 * scale;
+    ctx.font = `500 ${dateFontSize}px system-ui, -apple-system, sans-serif`;
+    ctx.fillText(today, centerX, currentY);
+    currentY += dateFontSize * 1.6;
 
-    const line1 = line1Parts.join('  •  ');
-    const lineHeight = fontSize * 1.4;
-    
-    ctx.fillText(line1, centerX, 32 * scale);
-    ctx.fillText(today, centerX, 32 * scale + lineHeight);
-    
-    // Add Mineclima branding at bottom right with icon
+    // 4. Temperature (prominent)
+    if (temperature !== undefined) {
+      const tempFontSize = 36 * scale;
+      ctx.font = `600 ${tempFontSize}px system-ui, -apple-system, sans-serif`;
+      ctx.fillText(`${Math.round(temperature)}°C`, centerX, currentY);
+    }
+
+    // Branding at bottom right
     const brandFontSize = 14 * scale;
-    ctx.font = `600 ${brandFontSize}px system-ui, sans-serif`;
+    const padding = 20 * scale;
+    ctx.font = `600 ${brandFontSize}px system-ui, -apple-system, sans-serif`;
     ctx.textAlign = 'right';
     
     const brandText = 'Mineclima';
-    const iconSize = brandFontSize * 1.2;
-    const padding = 20 * scale;
-    const iconGap = 6 * scale;
-    
-    // Draw weather icon (sun emoji as brand icon)
     const brandTextWidth = ctx.measureText(brandText).width;
-    const startX = canvas.width - padding - brandTextWidth;
     const brandY = canvas.height - padding;
     
-    // Draw the brand text
     ctx.fillText(brandText, canvas.width - padding, brandY);
     
-    // Draw a simple sun icon to the left of the text
-    ctx.font = `${iconSize}px system-ui, sans-serif`;
+    // Sun icon left of brand
+    ctx.font = `${brandFontSize * 1.2}px system-ui, sans-serif`;
     ctx.textAlign = 'left';
-    ctx.fillText('☀️', startX - iconSize - iconGap, brandY);
+    ctx.fillText('☀️', canvas.width - padding - brandTextWidth - brandFontSize * 1.5, brandY);
 
     URL.revokeObjectURL(img.src);
 
