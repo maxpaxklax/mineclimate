@@ -157,19 +157,19 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
             )}
           />
           
-          {/* Text overlay */}
-          <div className="absolute inset-x-0 top-8 z-20 flex flex-col items-center text-center pointer-events-none">
-            <h1 className="text-3xl font-bold text-white drop-shadow-lg" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
+          {/* Text overlay - positioned to overlap image on mobile */}
+          <div className="absolute inset-x-0 top-[15%] md:top-8 z-20 flex flex-col items-center text-center pointer-events-none">
+            <h1 className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
               {city}
             </h1>
             {WeatherIcon && (
-              <WeatherIcon className="mt-2 h-8 w-8 text-white drop-shadow-lg" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.4))' }} />
+              <WeatherIcon className="mt-2 h-6 w-6 md:h-8 md:w-8 text-white drop-shadow-lg" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.4))' }} />
             )}
-            <p className="mt-1 text-sm text-white/90 drop-shadow-md" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>
+            <p className="mt-1 text-xs md:text-sm text-white/90 drop-shadow-md" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>
               {today}
             </p>
             {temperature !== undefined && (
-              <p className="mt-1 text-xl font-semibold text-white drop-shadow-lg" style={{ textShadow: '0 2px 6px rgba(0,0,0,0.5)' }}>
+              <p className="mt-1 text-lg md:text-xl font-semibold text-white drop-shadow-lg" style={{ textShadow: '0 2px 6px rgba(0,0,0,0.5)' }}>
                 {Math.round(temperature)}°C
               </p>
             )}
