@@ -1,27 +1,61 @@
-import { MapPin, Search } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { MapPin, Search, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useState } from 'react';
+import { searchCities, LocationData } from '@/lib/weather';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface LocationPermissionProps {
   error: string;
-  onSearch: (city: string) => void;
+  onSelectLocation: (location: LocationData) => void;
   isLoading: boolean;
 }
 
-export function LocationPermission({ error, onSearch, isLoading }: LocationPermissionProps) {
+export function LocationPermission({ error, onSelectLocation, isLoading }: LocationPermissionProps) {
   const [query, setQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<LocationData[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  
+  const debouncedQuery = useDebounce(query, 300);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (query.trim()) {
-      onSearch(query.trim());
+  useEffect(() => {
+    async function search() {
+      if (debouncedQuery.trim().length < 2) {
+        setSearchResults([]);
+        return;
+      }
+      
+      setIsSearching(true);
+      try {
+        const results = await searchCities(debouncedQuery);
+        setSearchResults(results);
+      } catch (e) {
+        console.error('Search failed:', e);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
     }
+    
+    search();
+  }, [debouncedQuery]);
+
+  const handleSelectResult = (location: LocationData) => {
+    onSelectLocation(location);
+    setQuery('');
+    setSearchResults([]);
+  };
+
+  const formatLocationLabel = (location: LocationData) => {
+    const parts = [location.city];
+    if (location.admin1) parts.push(location.admin1);
+    if (location.country) parts.push(location.country);
+    return parts.join(', ');
   };
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-6">
-      <div className="max-w-sm text-center">
+      <div className="w-full max-w-sm text-center">
         <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
           <MapPin className="h-10 w-10 text-primary" />
         </div>
@@ -36,20 +70,44 @@ export function LocationPermission({ error, onSearch, isLoading }: LocationPermi
             : error || 'Search for a city to see its weather visualization.'}
         </p>
         
-        <form onSubmit={handleSubmit} className="flex gap-2">
-          <Input
-            type="text"
-            placeholder="Enter city name..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="flex-1"
-            disabled={isLoading}
-          />
-          <Button type="submit" disabled={isLoading || !query.trim()}>
-            <Search className="mr-2 h-4 w-4" />
-            Search
-          </Button>
-        </form>
+        <div className="relative">
+          <div className="relative">
+            <Input
+              type="text"
+              placeholder="Enter city name..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="w-full pr-10"
+              disabled={isLoading}
+            />
+            {isSearching && (
+              <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+            )}
+          </div>
+          
+          {searchResults.length > 0 && (
+            <div className="absolute left-0 right-0 top-full z-10 mt-2 max-h-48 overflow-y-auto rounded-xl border bg-background shadow-lg">
+              {searchResults.map((location, index) => (
+                <button
+                  key={`${location.latitude}-${location.longitude}-${index}`}
+                  type="button"
+                  onClick={() => handleSelectResult(location)}
+                  disabled={isLoading}
+                  className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-secondary/50 first:rounded-t-xl last:rounded-b-xl disabled:opacity-50"
+                >
+                  <MapPin className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <span className="text-sm">{formatLocationLabel(location)}</span>
+                </button>
+              ))}
+            </div>
+          )}
+          
+          {debouncedQuery.trim().length >= 2 && !isSearching && searchResults.length === 0 && (
+            <div className="absolute left-0 right-0 top-full z-10 mt-2 rounded-xl border bg-background px-4 py-3 text-center text-sm text-muted-foreground shadow-lg">
+              No cities found
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

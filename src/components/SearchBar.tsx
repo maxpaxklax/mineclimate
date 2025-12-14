@@ -1,12 +1,14 @@
-import { useState } from 'react';
-import { Search, Share2, Download, RefreshCw } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Share2, Download, RefreshCw, Loader2, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { searchCities, LocationData } from '@/lib/weather';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface SearchBarProps {
-  onSearch: (city: string) => void;
+  onSelectLocation: (location: LocationData) => void;
   onRefresh: () => void;
   imageUrl: string | null;
   isLoading: boolean;
@@ -22,17 +24,54 @@ const weatherEmojis: Record<string, string> = {
   overcast: '☁️',
 };
 
-export function SearchBar({ onSearch, onRefresh, imageUrl, isLoading, city, temperature, condition }: SearchBarProps) {
+export function SearchBar({ onSelectLocation, onRefresh, imageUrl, isLoading, city, temperature, condition }: SearchBarProps) {
   const [query, setQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchResults, setSearchResults] = useState<LocationData[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  
+  const debouncedQuery = useDebounce(query, 300);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (query.trim()) {
-      onSearch(query.trim());
-      setQuery('');
-      setIsSearchOpen(false);
+  useEffect(() => {
+    async function search() {
+      if (debouncedQuery.trim().length < 2) {
+        setSearchResults([]);
+        return;
+      }
+      
+      setIsSearching(true);
+      try {
+        const results = await searchCities(debouncedQuery);
+        setSearchResults(results);
+      } catch (e) {
+        console.error('Search failed:', e);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
     }
+    
+    search();
+  }, [debouncedQuery]);
+
+  const handleSelectResult = (location: LocationData) => {
+    onSelectLocation(location);
+    setQuery('');
+    setSearchResults([]);
+    setIsSearchOpen(false);
+  };
+
+  const handleClose = () => {
+    setIsSearchOpen(false);
+    setQuery('');
+    setSearchResults([]);
+  };
+
+  const formatLocationLabel = (location: LocationData) => {
+    const parts = [location.city];
+    if (location.admin1) parts.push(location.admin1);
+    if (location.country) parts.push(location.country);
+    return parts.join(', ');
   };
 
   const createImageWithOverlay = async (): Promise<Blob | null> => {
@@ -175,28 +214,54 @@ export function SearchBar({ onSearch, onRefresh, imageUrl, isLoading, city, temp
     <div className="fixed bottom-0 left-0 right-0 z-20 safe-area-bottom">
       <div className="search-bar mx-4 mb-4 rounded-2xl p-3">
         {isSearchOpen ? (
-          <form onSubmit={handleSubmit} className="flex gap-2">
-            <Input
-              type="text"
-              placeholder="Search for a city..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="flex-1 border-0 bg-secondary/50 focus-visible:ring-1"
-              autoFocus
-              disabled={isLoading}
-            />
-            <Button type="submit" size="sm" disabled={isLoading || !query.trim()}>
-              Go
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsSearchOpen(false)}
-            >
-              Cancel
-            </Button>
-          </form>
+          <div className="flex flex-col gap-2">
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Input
+                  type="text"
+                  placeholder="Search for a city..."
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  className="border-0 bg-secondary/50 focus-visible:ring-1 pr-8"
+                  autoFocus
+                  disabled={isLoading}
+                />
+                {isSearching && (
+                  <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+                )}
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleClose}
+              >
+                Cancel
+              </Button>
+            </div>
+            
+            {searchResults.length > 0 && (
+              <div className="max-h-48 overflow-y-auto rounded-xl bg-background/95 backdrop-blur-sm">
+                {searchResults.map((location, index) => (
+                  <button
+                    key={`${location.latitude}-${location.longitude}-${index}`}
+                    type="button"
+                    onClick={() => handleSelectResult(location)}
+                    className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-secondary/50 first:rounded-t-xl last:rounded-b-xl"
+                  >
+                    <MapPin className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <span className="text-sm">{formatLocationLabel(location)}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+            
+            {debouncedQuery.trim().length >= 2 && !isSearching && searchResults.length === 0 && (
+              <div className="px-4 py-3 text-center text-sm text-muted-foreground">
+                No cities found
+              </div>
+            )}
+          </div>
         ) : (
           <div className="flex items-center justify-between">
             <button
