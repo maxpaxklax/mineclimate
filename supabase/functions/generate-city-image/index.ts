@@ -11,6 +11,29 @@ interface RequestBody {
   temperature: number;
 }
 
+// Cities with metro/subway systems (normalized to lowercase for matching)
+const citiesWithSubway = new Set([
+  'london', 'paris', 'new york', 'tokyo', 'berlin', 'madrid', 'barcelona', 'rome', 'milan',
+  'moscow', 'beijing', 'shanghai', 'hong kong', 'singapore', 'seoul', 'osaka', 'nagoya',
+  'mexico city', 'são paulo', 'buenos aires', 'santiago', 'lima', 'bogotá', 'medellín',
+  'cairo', 'dubai', 'istanbul', 'tehran', 'delhi', 'mumbai', 'kolkata', 'chennai', 'bangalore',
+  'amsterdam', 'rotterdam', 'brussels', 'vienna', 'prague', 'budapest', 'warsaw', 'bucharest',
+  'athens', 'lisbon', 'stockholm', 'oslo', 'copenhagen', 'helsinki', 'munich', 'hamburg',
+  'frankfurt', 'cologne', 'düsseldorf', 'nuremberg', 'chicago', 'boston', 'washington',
+  'philadelphia', 'los angeles', 'san francisco', 'atlanta', 'miami', 'toronto', 'montreal',
+  'vancouver', 'sydney', 'melbourne', 'guangzhou', 'shenzhen', 'wuhan', 'chengdu', 'nanjing',
+  'taipei', 'kaohsiung', 'kuala lumpur', 'bangkok', 'jakarta', 'manila', 'hanoi', 'kyiv',
+  'minsk', 'tbilisi', 'baku', 'almaty', 'tashkent', 'algiers', 'tunis', 'casablanca',
+  'lyon', 'marseille', 'toulouse', 'lille', 'rennes', 'naples', 'turin', 'genoa', 'catania',
+  'bilbao', 'valencia', 'seville', 'málaga', 'palma', 'glasgow', 'newcastle', 'liverpool',
+  'manchester', 'birmingham', 'leeds', 'bristol', 'edinburgh', 'cardiff', 'belfast',
+]);
+
+function hasSubway(city: string): boolean {
+  const normalized = city.toLowerCase().trim();
+  return citiesWithSubway.has(normalized);
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -28,7 +51,8 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    console.log(`[generate-city-image] Starting for ${city} with ${condition} weather at ${temperature}°`);
+    const cityHasSubway = hasSubway(city);
+    console.log(`[generate-city-image] Starting for ${city} (subway: ${cityHasSubway}) with ${condition} weather at ${temperature}°`);
 
     // Build the prompt based on weather condition
     const weatherDescriptions = {
@@ -38,7 +62,11 @@ serve(async (req) => {
       overcast: 'cloudy overcast day with soft diffused light, grey clouds, muted colors, calm atmosphere',
     };
 
-    const prompt = `Create an isometric 3D city illustration of ${city} showing ${weatherDescriptions[condition]}. Portrait format. Three layers: sky with weather, iconic city landmarks, underground subway/metro cross-section. Modern vector art style.`;
+    const undergroundLayer = cityHasSubway
+      ? 'underground subway/metro cross-section with trains and tunnels'
+      : 'underground cross-section showing natural earth layers, roots, and pipes';
+
+    const prompt = `Create an isometric 3D city illustration of ${city} showing ${weatherDescriptions[condition]}. Portrait format. Three layers: sky with weather, recognizable local architecture and landmarks, ${undergroundLayer}. Modern vector art style.`;
 
     console.log(`[generate-city-image] Calling AI gateway with prompt length: ${prompt.length}`);
 
