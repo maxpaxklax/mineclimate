@@ -2,6 +2,7 @@ import { cn } from '@/lib/utils';
 import { Loader2, Sun, Cloud, CloudRain, Snowflake } from 'lucide-react';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { format } from 'date-fns';
+import { WeatherEffects } from './WeatherEffects';
 
 interface CityImageProps {
   imageUrl: string | null;
@@ -242,6 +243,9 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
               transform: `scale(${scale}) translate(${translate.x / scale}px, ${translate.y / scale}px)`,
             }}
           />
+          
+          {/* Weather effects overlay */}
+          <WeatherEffects condition={condition} isVisible={imageLoaded && scale < 1.5} />
           
           {/* Text overlay - positioned to overlap image on mobile */}
           <div 
