@@ -63,10 +63,10 @@ serve(async (req) => {
     };
 
     const undergroundLayer = cityHasSubway
-      ? 'colorful underground subway/metro cross-section with vibrant colored train tunnels (blue, yellow, red, green tubes) and detailed metro station with passengers'
+      ? 'underground subway/metro cross-section with train tunnels and detailed metro station with passengers'
       : 'underground cross-section showing natural brown earth layers, tree roots, utility pipes';
 
-    const prompt = `Create a highly detailed, vibrant isometric 3D diorama illustration of ${city} showing ${weatherDescriptions[condition]}. Ultra high quality, rich saturated colors, crisp details. Portrait format composition with three distinct layers: sky layer with weather effects, middle layer featuring recognizable ${city} architecture landmarks and city life with tiny people cars and trees, ${undergroundLayer}. Modern stylized vector art style with bold colors, clean lines, and playful charm. The image should be colorful and visually striking.`;
+    const prompt = `Create a highly detailed isometric 3D diorama illustration of ${city} showing ${weatherDescriptions[condition]}. Portrait format composition with three distinct layers: sky layer with weather effects, middle layer featuring recognizable ${city} architecture landmarks and city life with tiny people cars and trees, ${undergroundLayer}. Use soft, refined textures with realistic PBR materials and gentle, lifelike lighting and shadows. Integrate the current weather conditions directly into the city environment to create an immersive atmospheric mood. Use a clean, minimalistic composition with a soft, solid-colored background.`;
 
     console.log(`[generate-city-image] Calling AI gateway with prompt length: ${prompt.length}`);
 
