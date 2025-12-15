@@ -197,19 +197,19 @@
 
   @keyframes bird-fly {
     0% {
-      left: -10%;
-      top: 80%;
+      left: 5%;
+      top: 50%;
       opacity: 0;
     }
-    5% {
+    10% {
       opacity: 1;
     }
-    95% {
+    90% {
       opacity: 1;
     }
     100% {
-      left: 110%;
-      top: -10%;
+      left: 95%;
+      top: 10%;
       opacity: 0;
     }
   }
