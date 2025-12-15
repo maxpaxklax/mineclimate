@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 interface WeatherEffectsProps {
   condition?: 'sunny' | 'rainy' | 'snowy' | 'overcast';
@@ -87,16 +87,122 @@ function BirdSVG({ className, style, flapDuration }: { className?: string; style
   );
 }
 
+function SantaSleighSVG({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <svg 
+      viewBox="0 0 200 50" 
+      className={className}
+      style={style}
+      fill="currentColor"
+    >
+      {/* Reindeer 1 (front) */}
+      <g transform="translate(0, 15)">
+        <ellipse cx="12" cy="12" rx="8" ry="5" fill="#8B4513" /> {/* body */}
+        <circle cx="6" cy="8" r="3" fill="#8B4513" /> {/* head */}
+        <path d="M4 5 L2 0 M4 5 L6 0" stroke="#8B4513" strokeWidth="1" fill="none" /> {/* antlers */}
+        <line x1="8" y1="17" x2="6" y2="22" stroke="#8B4513" strokeWidth="1.5" /> {/* legs */}
+        <line x1="16" y1="17" x2="18" y2="22" stroke="#8B4513" strokeWidth="1.5" />
+        <circle cx="5" cy="9" r="0.5" fill="#DC143C" /> {/* red nose */}
+      </g>
+      
+      {/* Reindeer 2 */}
+      <g transform="translate(25, 18)">
+        <ellipse cx="12" cy="12" rx="8" ry="5" fill="#A0522D" />
+        <circle cx="6" cy="8" r="3" fill="#A0522D" />
+        <path d="M4 5 L2 0 M4 5 L6 0" stroke="#A0522D" strokeWidth="1" fill="none" />
+        <line x1="8" y1="17" x2="6" y2="20" stroke="#A0522D" strokeWidth="1.5" />
+        <line x1="16" y1="17" x2="18" y2="20" stroke="#A0522D" strokeWidth="1.5" />
+      </g>
+      
+      {/* Reins */}
+      <path d="M20 28 Q50 25 80 30" stroke="#DAA520" strokeWidth="1" fill="none" />
+      <path d="M45 33 Q60 28 80 32" stroke="#DAA520" strokeWidth="1" fill="none" />
+      
+      {/* Sleigh */}
+      <g transform="translate(75, 20)">
+        {/* Sleigh base */}
+        <path d="M0 25 Q5 30 60 30 Q70 30 75 25 L75 15 Q70 10 60 10 L15 10 Q5 10 0 15 Z" fill="#DC143C" />
+        {/* Sleigh runner */}
+        <path d="M-5 32 Q0 35 65 35 Q80 35 85 30" stroke="#FFD700" strokeWidth="2" fill="none" />
+        
+        {/* Presents */}
+        <rect x="45" y="5" width="10" height="10" fill="#228B22" />
+        <path d="M45 10 L55 10 M50 5 L50 15" stroke="#FFD700" strokeWidth="1" />
+        <rect x="52" y="2" width="8" height="8" fill="#FF6347" />
+        <path d="M52 6 L60 6 M56 2 L56 10" stroke="#FFFFFF" strokeWidth="1" />
+        <rect x="38" y="7" width="8" height="8" fill="#4169E1" />
+        <path d="M38 11 L46 11 M42 7 L42 15" stroke="#FFD700" strokeWidth="1" />
+        
+        {/* Santa */}
+        <circle cx="25" cy="5" r="6" fill="#FFE4C4" /> {/* face */}
+        <ellipse cx="25" cy="-2" rx="7" ry="4" fill="#DC143C" /> {/* hat */}
+        <circle cx="25" cy="-6" r="2" fill="#FFFFFF" /> {/* hat pom */}
+        <ellipse cx="25" cy="15" rx="10" ry="8" fill="#DC143C" /> {/* body */}
+        <ellipse cx="25" cy="20" rx="8" ry="3" fill="#000000" /> {/* belt area */}
+        <rect x="23" y="18" width="4" height="4" fill="#FFD700" /> {/* belt buckle */}
+      </g>
+    </svg>
+  );
+}
+
 export function WeatherEffects({ condition, isVisible }: WeatherEffectsProps) {
   const rainDrops = useMemo(() => generateParticles(30, 42), []);
   const snowflakes = useMemo(() => generateParticles(25, 73), []);
   const clouds = useMemo(() => generateClouds(4, 17), []);
   const birds = useMemo(() => generateBirds(3, 89), []);
+  
+  const [santaKey, setSantaKey] = useState(0);
+  const [santaTop, setSantaTop] = useState(15);
+  const [showSanta, setShowSanta] = useState(false);
+
+  useEffect(() => {
+    if (!isVisible) return;
+
+    const scheduleSanta = () => {
+      // Random delay between 0-60 seconds
+      const delay = Math.random() * 60000;
+      
+      return setTimeout(() => {
+        setSantaTop(5 + Math.random() * 25); // Random vertical position
+        setSantaKey(prev => prev + 1);
+        setShowSanta(true);
+        
+        // Hide santa after animation completes (4 seconds)
+        setTimeout(() => setShowSanta(false), 4000);
+      }, delay);
+    };
+
+    // Initial santa appearance
+    const initialTimer = scheduleSanta();
+    
+    // Set up recurring interval
+    const interval = setInterval(() => {
+      scheduleSanta();
+    }, 60000);
+
+    return () => {
+      clearTimeout(initialTimer);
+      clearInterval(interval);
+    };
+  }, [isVisible]);
 
   if (!isVisible) return null;
 
   return (
     <div className="absolute inset-0 z-[15] pointer-events-none overflow-hidden">
+      {/* Santa Sleigh - appears randomly every 60 seconds */}
+      {showSanta && (
+        <div
+          key={santaKey}
+          className="absolute animate-santa-fly"
+          style={{
+            top: `${santaTop}%`,
+          }}
+        >
+          <SantaSleighSVG className="w-32 md:w-48 drop-shadow-lg" />
+        </div>
+      )}
+
       {/* Animated birds - show for sunny and overcast */}
       {(condition === 'sunny' || condition === 'overcast') && (
         <div className="absolute inset-0">
