@@ -66,7 +66,7 @@ function CloudSVG({ className, style }: { className?: string; style?: React.CSSP
 function BirdSVG({ className, style, flapDuration }: { className?: string; style?: React.CSSProperties; flapDuration: number }) {
   return (
     <svg 
-      viewBox="0 0 24 12" 
+      viewBox="0 0 24 14" 
       className={className}
       style={style}
       fill="none"
@@ -75,14 +75,24 @@ function BirdSVG({ className, style, flapDuration }: { className?: string; style
       strokeLinecap="round"
       strokeLinejoin="round"
     >
+      {/* Left wing */}
       <path 
-        d="M2 6 Q6 2 12 6 Q18 2 22 6"
-        className="animate-bird-flap"
+        d="M12 7 Q8 3 2 5"
+        className="origin-[12px_7px]"
         style={{ 
-          animationDuration: `${flapDuration}s`,
-          transformOrigin: 'center'
+          animation: `wing-flap-left ${flapDuration}s ease-in-out infinite`,
         }}
       />
+      {/* Right wing */}
+      <path 
+        d="M12 7 Q16 3 22 5"
+        className="origin-[12px_7px]"
+        style={{ 
+          animation: `wing-flap-right ${flapDuration}s ease-in-out infinite`,
+        }}
+      />
+      {/* Body */}
+      <ellipse cx="12" cy="8" rx="3" ry="2" fill="currentColor" opacity="0.6" />
     </svg>
   );
 }
