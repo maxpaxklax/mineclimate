@@ -98,180 +98,215 @@ function BirdSVG({ className, style, flapDuration }: { className?: string; style
 function SantaSleighSVG({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
     <svg 
-      viewBox="0 0 280 70" 
+      viewBox="0 0 300 90" 
       className={className}
-      style={style}
+      style={{ ...style, transform: `${style?.transform || ''} scaleX(-1)` }}
     >
-      {/* Stars/sparkles trail */}
-      <g className="animate-pulse">
-        <circle cx="5" cy="35" r="1.5" fill="#FFD700" opacity="0.8" />
-        <circle cx="15" cy="28" r="1" fill="#FFFFFF" opacity="0.6" />
-        <circle cx="10" cy="45" r="1.2" fill="#FFD700" opacity="0.7" />
-      </g>
-
-      {/* Reindeer 1 - Rudolph (front) */}
-      <g transform="translate(0, 20)">
-        {/* Body */}
-        <ellipse cx="18" cy="18" rx="12" ry="7" fill="#8B4513" />
-        {/* Neck */}
-        <path d="M8 15 Q5 10 8 5" stroke="#8B4513" strokeWidth="4" fill="none" />
-        {/* Head */}
-        <ellipse cx="8" cy="4" rx="5" ry="4" fill="#A0522D" />
-        {/* Antlers */}
-        <path d="M5 0 L3 -8 M3 -5 L0 -7 M3 -3 L1 -4" stroke="#5D3A1A" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-        <path d="M11 0 L13 -8 M13 -5 L16 -7 M13 -3 L15 -4" stroke="#5D3A1A" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-        {/* Ear */}
-        <ellipse cx="4" cy="1" rx="2" ry="1" fill="#A0522D" />
-        {/* Eye */}
-        <circle cx="6" cy="3" r="1" fill="#000000" />
-        <circle cx="6.3" cy="2.7" r="0.3" fill="#FFFFFF" />
-        {/* Rudolph's red nose */}
-        <circle cx="3" cy="5" r="2.5" fill="#FF0000" />
-        <circle cx="2.5" cy="4.5" r="0.8" fill="#FF6666" />
-        {/* Legs */}
-        <line x1="12" y1="24" x2="10" y2="32" stroke="#6B4423" strokeWidth="2.5" strokeLinecap="round" />
-        <line x1="24" y1="24" x2="26" y2="32" stroke="#6B4423" strokeWidth="2.5" strokeLinecap="round" />
-        {/* Hooves */}
-        <ellipse cx="10" cy="33" rx="2" ry="1.5" fill="#3D2314" />
-        <ellipse cx="26" cy="33" rx="2" ry="1.5" fill="#3D2314" />
-        {/* Harness */}
-        <path d="M10 12 Q18 8 26 12" stroke="#C41E3A" strokeWidth="1.5" fill="none" />
-        <circle cx="18" cy="10" r="2" fill="#FFD700" />
-      </g>
-
-      {/* Reindeer 2 */}
-      <g transform="translate(35, 22)">
-        <ellipse cx="18" cy="18" rx="11" ry="6" fill="#A0522D" />
-        <path d="M8 14 Q6 10 8 6" stroke="#A0522D" strokeWidth="3.5" fill="none" />
-        <ellipse cx="8" cy="5" rx="4.5" ry="3.5" fill="#8B7355" />
-        <path d="M5 1 L4 -5 M4 -3 L2 -4" stroke="#5D3A1A" strokeWidth="1.2" fill="none" strokeLinecap="round" />
-        <path d="M11 1 L12 -5 M12 -3 L14 -4" stroke="#5D3A1A" strokeWidth="1.2" fill="none" strokeLinecap="round" />
-        <circle cx="6" cy="4" r="0.8" fill="#000000" />
-        <ellipse cx="4" cy="6" rx="1.5" ry="1" fill="#3D2314" />
-        <line x1="12" y1="23" x2="10" y2="30" stroke="#6B4423" strokeWidth="2" strokeLinecap="round" />
-        <line x1="24" y1="23" x2="26" y2="30" stroke="#6B4423" strokeWidth="2" strokeLinecap="round" />
-        <ellipse cx="10" cy="31" rx="1.8" ry="1.3" fill="#3D2314" />
-        <ellipse cx="26" cy="31" rx="1.8" ry="1.3" fill="#3D2314" />
-        <path d="M10 12 Q18 9 26 12" stroke="#C41E3A" strokeWidth="1.5" fill="none" />
-      </g>
-
-      {/* Reindeer 3 */}
-      <g transform="translate(65, 24)">
-        <ellipse cx="16" cy="16" rx="10" ry="5.5" fill="#8B7355" />
-        <path d="M7 12 Q5 9 7 5" stroke="#8B7355" strokeWidth="3" fill="none" />
-        <ellipse cx="7" cy="4" rx="4" ry="3" fill="#A08060" />
-        <path d="M4 0 L3 -4 M3 -2 L1 -3" stroke="#5D3A1A" strokeWidth="1" fill="none" strokeLinecap="round" />
-        <path d="M10 0 L11 -4 M11 -2 L13 -3" stroke="#5D3A1A" strokeWidth="1" fill="none" strokeLinecap="round" />
-        <circle cx="5" cy="3" r="0.7" fill="#000000" />
-        <ellipse cx="3" cy="5" rx="1.3" ry="0.8" fill="#3D2314" />
-        <line x1="10" y1="21" x2="9" y2="27" stroke="#6B4423" strokeWidth="1.8" strokeLinecap="round" />
-        <line x1="22" y1="21" x2="23" y2="27" stroke="#6B4423" strokeWidth="1.8" strokeLinecap="round" />
-        <path d="M8 10 Q16 7 24 10" stroke="#C41E3A" strokeWidth="1.2" fill="none" />
-      </g>
-
-      {/* Golden reins connecting to sleigh */}
-      <path d="M30 38 Q60 32 95 42" stroke="#DAA520" strokeWidth="1.5" fill="none" />
-      <path d="M55 40 Q75 35 95 44" stroke="#DAA520" strokeWidth="1.5" fill="none" />
-      <path d="M80 42 Q90 40 100 45" stroke="#DAA520" strokeWidth="1.5" fill="none" />
-      
-      {/* Sleigh */}
-      <g transform="translate(95, 15)">
-        {/* Sleigh body - main */}
-        <path d="M0 35 Q-5 45 10 50 L140 50 Q155 45 150 35 L145 20 Q140 10 125 10 L25 10 Q10 10 5 20 Z" fill="url(#sleighGradient)" />
-        {/* Sleigh body highlight */}
-        <path d="M10 15 Q15 12 120 12 Q130 12 135 15" stroke="#FF6B6B" strokeWidth="2" fill="none" opacity="0.6" />
-        {/* Sleigh runner */}
-        <path d="M-10 52 Q-5 58 15 58 L145 58 Q165 58 170 50" stroke="#FFD700" strokeWidth="3" fill="none" />
-        <path d="M-10 52 Q-5 58 15 58 L145 58 Q165 58 170 50" stroke="#FFF8DC" strokeWidth="1" fill="none" opacity="0.5" />
-        {/* Runner curl */}
-        <path d="M-10 52 Q-15 48 -12 42 Q-8 38 -2 40" stroke="#FFD700" strokeWidth="3" fill="none" />
-        {/* Sleigh side decoration */}
-        <path d="M20 25 Q75 20 130 25" stroke="#FFD700" strokeWidth="1.5" fill="none" />
-        <circle cx="30" cy="30" r="3" fill="#FFD700" />
-        <circle cx="75" cy="28" r="3" fill="#FFD700" />
-        <circle cx="120" cy="30" r="3" fill="#FFD700" />
-        
-        {/* Presents stack */}
-        {/* Large green present */}
-        <rect x="100" y="0" width="18" height="16" rx="1" fill="#228B22" />
-        <rect x="107" y="0" width="4" height="16" fill="#32CD32" opacity="0.5" />
-        <path d="M100 8 L118 8" stroke="#FF0000" strokeWidth="2" />
-        <path d="M109 0 L109 16" stroke="#FF0000" strokeWidth="2" />
-        <path d="M105 -2 Q109 -5 113 -2" stroke="#FF0000" strokeWidth="2" fill="none" />
-        
-        {/* Red present */}
-        <rect x="115" y="5" width="14" height="12" rx="1" fill="#DC143C" />
-        <path d="M115 11 L129 11" stroke="#FFFFFF" strokeWidth="1.5" />
-        <path d="M122 5 L122 17" stroke="#FFFFFF" strokeWidth="1.5" />
-        <circle cx="122" cy="5" r="2" fill="#FFD700" />
-        
-        {/* Blue present */}
-        <rect x="90" y="5" width="12" height="10" rx="1" fill="#4169E1" />
-        <path d="M90 10 L102 10" stroke="#87CEEB" strokeWidth="1.5" />
-        <path d="M96 5 L96 15" stroke="#87CEEB" strokeWidth="1.5" />
-        
-        {/* Small purple present */}
-        <rect x="125" y="-2" width="10" height="8" rx="1" fill="#9932CC" />
-        <path d="M125 2 L135 2 M130 -2 L130 6" stroke="#FFD700" strokeWidth="1" />
-        
-        {/* Sack of presents */}
-        <ellipse cx="85" cy="8" rx="10" ry="12" fill="#8B0000" />
-        <path d="M78 0 Q85 -5 92 0" stroke="#A52A2A" strokeWidth="3" fill="none" />
-        <path d="M82 -2 L80 -6 M88 -2 L90 -6" stroke="#DAA520" strokeWidth="1.5" strokeLinecap="round" />
-        
-        {/* Santa */}
-        {/* Body */}
-        <ellipse cx="50" cy="20" rx="18" ry="22" fill="#DC143C" />
-        {/* Fur trim */}
-        <ellipse cx="50" cy="38" rx="16" ry="4" fill="#FFFAFA" />
-        {/* Belt */}
-        <rect x="34" y="28" width="32" height="6" fill="#1A1A1A" />
-        <rect x="46" y="27" width="8" height="8" rx="1" fill="#FFD700" />
-        <rect x="48" y="29" width="4" height="4" fill="#1A1A1A" />
-        
-        {/* Arms */}
-        <ellipse cx="30" cy="18" rx="6" ry="10" fill="#DC143C" transform="rotate(-20 30 18)" />
-        <ellipse cx="70" cy="18" rx="6" ry="10" fill="#DC143C" transform="rotate(20 70 18)" />
-        {/* Mittens */}
-        <circle cx="26" cy="24" r="4" fill="#FFFAFA" />
-        <circle cx="74" cy="24" r="4" fill="#FFFAFA" />
-        
-        {/* Head */}
-        <circle cx="50" cy="-5" r="12" fill="#FFE4C4" />
-        {/* Rosy cheeks */}
-        <circle cx="42" cy="-2" r="3" fill="#FFB6C1" opacity="0.6" />
-        <circle cx="58" cy="-2" r="3" fill="#FFB6C1" opacity="0.6" />
-        {/* Eyes */}
-        <circle cx="45" cy="-7" r="2" fill="#000000" />
-        <circle cx="55" cy="-7" r="2" fill="#000000" />
-        <circle cx="45.5" cy="-7.5" r="0.6" fill="#FFFFFF" />
-        <circle cx="55.5" cy="-7.5" r="0.6" fill="#FFFFFF" />
-        {/* Nose */}
-        <circle cx="50" cy="-3" r="2.5" fill="#E8B4A0" />
-        {/* Smile */}
-        <path d="M45 2 Q50 6 55 2" stroke="#8B4513" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-        {/* Beard */}
-        <ellipse cx="50" cy="5" rx="10" ry="8" fill="#FFFAFA" />
-        <path d="M40 3 Q50 15 60 3" fill="#FFFAFA" />
-        {/* Mustache */}
-        <path d="M43 0 Q47 3 50 0 Q53 3 57 0" fill="#FFFAFA" stroke="#F5F5F5" strokeWidth="0.5" />
-        
-        {/* Hat */}
-        <path d="M35 -12 Q35 -25 50 -28 Q65 -25 65 -12" fill="#DC143C" />
-        <ellipse cx="50" cy="-12" rx="17" ry="4" fill="#FFFAFA" />
-        {/* Hat tip */}
-        <path d="M50 -28 Q55 -30 60 -25 Q62 -20 58 -18" stroke="#DC143C" strokeWidth="6" fill="none" strokeLinecap="round" />
-        <circle cx="60" cy="-18" r="4" fill="#FFFAFA" />
-      </g>
-      
-      {/* Gradient definitions */}
+      {/* Drop shadow filter for 3D effect */}
       <defs>
+        <filter id="sleighShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="3" dy="5" stdDeviation="3" floodColor="#000000" floodOpacity="0.4" />
+        </filter>
+        <filter id="glowFilter" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+          <feMerge>
+            <feMergeNode in="coloredBlur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
         <linearGradient id="sleighGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#DC143C" />
-          <stop offset="50%" stopColor="#B22222" />
+          <stop offset="0%" stopColor="#FF4444" />
+          <stop offset="30%" stopColor="#DC143C" />
+          <stop offset="70%" stopColor="#B22222" />
           <stop offset="100%" stopColor="#8B0000" />
         </linearGradient>
+        <linearGradient id="reindeerGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#A0522D" />
+          <stop offset="100%" stopColor="#6B4423" />
+        </linearGradient>
+        <linearGradient id="goldGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#FFD700" />
+          <stop offset="100%" stopColor="#B8860B" />
+        </linearGradient>
       </defs>
+
+      {/* Sparkle trail */}
+      <g className="animate-pulse" filter="url(#glowFilter)">
+        <circle cx="295" cy="45" r="2" fill="#FFD700" opacity="0.9" />
+        <circle cx="288" cy="38" r="1.5" fill="#FFFFFF" opacity="0.7" />
+        <circle cx="290" cy="55" r="1.8" fill="#FFD700" opacity="0.8" />
+        <circle cx="282" cy="48" r="1" fill="#FFFFFF" opacity="0.6" />
+      </g>
+
+      {/* Main group with shadow */}
+      <g filter="url(#sleighShadow)">
+        
+        {/* Sleigh */}
+        <g transform="translate(5, 25)">
+          {/* Sleigh body - 3D effect with multiple layers */}
+          <path d="M0 30 Q-5 42 10 48 L130 48 Q148 42 143 30 L138 15 Q132 5 115 5 L25 5 Q8 5 3 15 Z" fill="url(#sleighGradient)" />
+          {/* Inner highlight for 3D depth */}
+          <path d="M8 28 Q5 36 15 42 L125 42 Q138 36 135 28 L132 18 Q128 12 115 12 L28 12 Q15 12 12 18 Z" fill="#C41E3A" opacity="0.6" />
+          {/* Top rim highlight */}
+          <path d="M12 10 Q20 6 110 6 Q125 6 132 10" stroke="#FF6B6B" strokeWidth="2.5" fill="none" opacity="0.7" />
+          
+          {/* Sleigh runner - 3D gold */}
+          <path d="M-8 50 Q-3 58 18 58 L135 58 Q158 58 163 48" stroke="url(#goldGradient)" strokeWidth="4" fill="none" />
+          <path d="M-6 49 Q-1 55 18 55 L135 55 Q155 55 160 47" stroke="#FFF8DC" strokeWidth="1.5" fill="none" opacity="0.6" />
+          {/* Runner curl */}
+          <path d="M163 48 Q168 42 165 35 Q160 30 152 33" stroke="url(#goldGradient)" strokeWidth="4" fill="none" />
+          <path d="M161 47 Q165 42 163 37 Q159 33 153 35" stroke="#FFF8DC" strokeWidth="1" fill="none" opacity="0.5" />
+          
+          {/* Decorative elements */}
+          <path d="M20 22 Q70 17 120 22" stroke="#FFD700" strokeWidth="2" fill="none" />
+          <circle cx="30" cy="27" r="4" fill="url(#goldGradient)" />
+          <circle cx="70" cy="25" r="4" fill="url(#goldGradient)" />
+          <circle cx="110" cy="27" r="4" fill="url(#goldGradient)" />
+          
+          {/* Santa - 3D with shading */}
+          {/* Body with gradient */}
+          <ellipse cx="55" cy="18" rx="20" ry="24" fill="url(#sleighGradient)" />
+          {/* Body highlight */}
+          <ellipse cx="50" cy="15" rx="12" ry="16" fill="#E8383B" opacity="0.4" />
+          {/* Fur trim */}
+          <ellipse cx="55" cy="38" rx="18" ry="5" fill="#FFFAFA" />
+          <ellipse cx="55" cy="37" rx="15" ry="3" fill="#F0F0F0" opacity="0.5" />
+          {/* Belt */}
+          <rect x="37" y="26" width="36" height="7" rx="1" fill="#1A1A1A" />
+          <rect x="50" y="25" width="10" height="9" rx="1" fill="url(#goldGradient)" />
+          <rect x="52" y="27" width="6" height="5" rx="1" fill="#1A1A1A" />
+          
+          {/* Arms with 3D shading */}
+          <ellipse cx="32" cy="15" rx="7" ry="12" fill="#DC143C" transform="rotate(-15 32 15)" />
+          <ellipse cx="30" cy="13" rx="4" ry="8" fill="#E8383B" opacity="0.4" transform="rotate(-15 30 13)" />
+          <ellipse cx="78" cy="15" rx="7" ry="12" fill="#DC143C" transform="rotate(15 78 15)" />
+          {/* Mittens */}
+          <circle cx="28" cy="24" r="5" fill="#FFFAFA" />
+          <circle cx="27" cy="23" r="2" fill="#F0F0F0" opacity="0.5" />
+          <circle cx="82" cy="24" r="5" fill="#FFFAFA" />
+          
+          {/* Head with 3D shading */}
+          <circle cx="55" cy="-8" r="14" fill="#FFE4C4" />
+          <circle cx="52" cy="-10" r="8" fill="#FFECD4" opacity="0.5" />
+          {/* Rosy cheeks */}
+          <circle cx="45" cy="-4" r="4" fill="#FFB6C1" opacity="0.5" />
+          <circle cx="65" cy="-4" r="4" fill="#FFB6C1" opacity="0.5" />
+          {/* Eyes with depth */}
+          <ellipse cx="48" cy="-10" rx="2.5" ry="3" fill="#2C1810" />
+          <ellipse cx="62" cy="-10" rx="2.5" ry="3" fill="#2C1810" />
+          <circle cx="47" cy="-11" r="1" fill="#FFFFFF" />
+          <circle cx="61" cy="-11" r="1" fill="#FFFFFF" />
+          {/* Eyebrows */}
+          <path d="M45 -15 Q48 -17 51 -15" stroke="#FFFFFF" strokeWidth="1.5" fill="none" opacity="0.8" />
+          <path d="M59 -15 Q62 -17 65 -15" stroke="#FFFFFF" strokeWidth="1.5" fill="none" opacity="0.8" />
+          {/* Nose */}
+          <ellipse cx="55" cy="-5" rx="3" ry="2.5" fill="#E8A090" />
+          <circle cx="54" cy="-6" r="1" fill="#F0B0A0" opacity="0.5" />
+          {/* Smile */}
+          <path d="M48 2 Q55 8 62 2" stroke="#8B4513" strokeWidth="2" fill="none" strokeLinecap="round" />
+          {/* Beard with 3D layers */}
+          <ellipse cx="55" cy="6" rx="12" ry="10" fill="#FFFAFA" />
+          <ellipse cx="55" cy="8" rx="10" ry="8" fill="#F8F8F8" opacity="0.7" />
+          <path d="M43 4 Q55 20 67 4" fill="#FFFAFA" />
+          {/* Mustache */}
+          <path d="M46 -1 Q51 4 55 -1 Q59 4 64 -1" fill="#FFFAFA" stroke="#F0F0F0" strokeWidth="0.5" />
+          
+          {/* Hat with 3D effect */}
+          <path d="M38 -16 Q38 -32 55 -36 Q72 -32 72 -16" fill="#DC143C" />
+          <path d="M42 -18 Q42 -28 55 -32 Q65 -28 65 -18" fill="#E8383B" opacity="0.4" />
+          <ellipse cx="55" cy="-16" rx="19" ry="5" fill="#FFFAFA" />
+          <ellipse cx="55" cy="-17" rx="16" ry="3" fill="#F0F0F0" opacity="0.5" />
+          {/* Hat tip */}
+          <path d="M55 -36 Q62 -40 70 -32 Q74 -24 68 -20" stroke="#DC143C" strokeWidth="8" fill="none" strokeLinecap="round" />
+          <path d="M58 -35 Q63 -38 68 -32 Q71 -26 67 -23" stroke="#E8383B" strokeWidth="3" fill="none" strokeLinecap="round" opacity="0.5" />
+          <circle cx="68" cy="-20" r="6" fill="#FFFAFA" />
+          <circle cx="66" cy="-22" r="2" fill="#F0F0F0" opacity="0.5" />
+          
+          {/* Presents with 3D effect */}
+          {/* Sack */}
+          <ellipse cx="100" cy="5" rx="12" ry="15" fill="#8B0000" />
+          <ellipse cx="97" cy="2" rx="6" ry="10" fill="#A52A2A" opacity="0.4" />
+          <path d="M91 -5 Q100 -12 109 -5" stroke="#6B0000" strokeWidth="4" fill="none" />
+          <path d="M95 -7 L92 -12 M105 -7 L108 -12" stroke="url(#goldGradient)" strokeWidth="2" strokeLinecap="round" />
+          
+          {/* Green present */}
+          <rect x="110" y="-2" width="20" height="18" rx="2" fill="#228B22" />
+          <rect x="110" y="-2" width="8" height="18" fill="#2E8B2E" opacity="0.3" />
+          <path d="M110 7 L130 7" stroke="#FF0000" strokeWidth="3" />
+          <path d="M120 -2 L120 16" stroke="#FF0000" strokeWidth="3" />
+          <path d="M115 -4 Q120 -8 125 -4" stroke="#FF0000" strokeWidth="2.5" fill="none" />
+          
+          {/* Red present */}
+          <rect x="125" y="3" width="16" height="14" rx="2" fill="#DC143C" />
+          <rect x="125" y="3" width="6" height="14" fill="#E8383B" opacity="0.3" />
+          <path d="M125 10 L141 10" stroke="#FFFFFF" strokeWidth="2" />
+          <path d="M133 3 L133 17" stroke="#FFFFFF" strokeWidth="2" />
+          <circle cx="133" cy="3" r="3" fill="url(#goldGradient)" />
+        </g>
+        
+        {/* Golden reins */}
+        <path d="M148 52 Q175 48 200 55" stroke="url(#goldGradient)" strokeWidth="2" fill="none" />
+        <path d="M148 55 Q180 52 210 58" stroke="url(#goldGradient)" strokeWidth="2" fill="none" />
+        
+        {/* Reindeer 1 (closest to sleigh) */}
+        <g transform="translate(195, 35)">
+          <ellipse cx="18" cy="18" rx="14" ry="8" fill="url(#reindeerGradient)" />
+          <ellipse cx="14" cy="16" rx="6" ry="4" fill="#B8764A" opacity="0.4" />
+          <path d="M8 14 Q4 8 8 2" stroke="#8B4513" strokeWidth="5" fill="none" />
+          <ellipse cx="8" cy="0" rx="6" ry="5" fill="#A0522D" />
+          <ellipse cx="6" cy="-2" rx="3" ry="2.5" fill="#B8764A" opacity="0.4" />
+          <path d="M4 -4 L2 -14 M2 -10 L-2 -13 M2 -7 L-1 -9" stroke="#5D3A1A" strokeWidth="2" fill="none" strokeLinecap="round" />
+          <path d="M12 -4 L14 -14 M14 -10 L18 -13 M14 -7 L17 -9" stroke="#5D3A1A" strokeWidth="2" fill="none" strokeLinecap="round" />
+          <ellipse cx="3" cy="-2" rx="2.5" ry="1.5" fill="#A0522D" />
+          <circle cx="6" cy="-1" r="1.5" fill="#1A1A1A" />
+          <circle cx="5.5" cy="-1.5" r="0.5" fill="#FFFFFF" />
+          <ellipse cx="2" cy="2" rx="2" ry="1.2" fill="#3D2314" />
+          <line x1="10" y1="25" x2="8" y2="35" stroke="#6B4423" strokeWidth="3" strokeLinecap="round" />
+          <line x1="26" y1="25" x2="28" y2="35" stroke="#6B4423" strokeWidth="3" strokeLinecap="round" />
+          <ellipse cx="8" cy="36" rx="2.5" ry="2" fill="#3D2314" />
+          <ellipse cx="28" cy="36" rx="2.5" ry="2" fill="#3D2314" />
+          <path d="M10 12 Q18 8 26 12" stroke="#C41E3A" strokeWidth="2" fill="none" />
+          <circle cx="18" cy="10" r="3" fill="url(#goldGradient)" />
+        </g>
+
+        {/* Reindeer 2 */}
+        <g transform="translate(225, 33)">
+          <ellipse cx="16" cy="16" rx="12" ry="7" fill="url(#reindeerGradient)" />
+          <ellipse cx="12" cy="14" rx="5" ry="3.5" fill="#B8764A" opacity="0.4" />
+          <path d="M7 12 Q4 7 7 2" stroke="#8B4513" strokeWidth="4" fill="none" />
+          <ellipse cx="7" cy="0" rx="5" ry="4" fill="#8B7355" />
+          <path d="M4 -3 L2 -11 M2 -8 L0 -10" stroke="#5D3A1A" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+          <path d="M10 -3 L12 -11 M12 -8 L14 -10" stroke="#5D3A1A" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+          <circle cx="5" cy="-1" r="1.2" fill="#1A1A1A" />
+          <ellipse cx="2" cy="2" rx="1.8" ry="1" fill="#3D2314" />
+          <line x1="9" y1="22" x2="7" y2="31" stroke="#6B4423" strokeWidth="2.5" strokeLinecap="round" />
+          <line x1="23" y1="22" x2="25" y2="31" stroke="#6B4423" strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M8 10 Q16 7 24 10" stroke="#C41E3A" strokeWidth="1.5" fill="none" />
+        </g>
+
+        {/* Reindeer 3 - Rudolph (front) */}
+        <g transform="translate(252, 30)">
+          <ellipse cx="16" cy="16" rx="13" ry="7.5" fill="url(#reindeerGradient)" />
+          <ellipse cx="12" cy="14" rx="6" ry="4" fill="#B8764A" opacity="0.4" />
+          <path d="M6 12 Q2 6 6 0" stroke="#8B4513" strokeWidth="5" fill="none" />
+          <ellipse cx="6" cy="-2" rx="6" ry="5" fill="#A0522D" />
+          <ellipse cx="4" cy="-4" rx="3" ry="2.5" fill="#B8764A" opacity="0.4" />
+          <path d="M3 -6 L0 -16 M0 -12 L-4 -15 M0 -9 L-3 -11" stroke="#5D3A1A" strokeWidth="2" fill="none" strokeLinecap="round" />
+          <path d="M9 -6 L12 -16 M12 -12 L16 -15 M12 -9 L15 -11" stroke="#5D3A1A" strokeWidth="2" fill="none" strokeLinecap="round" />
+          <ellipse cx="1" cy="-4" rx="2.5" ry="1.5" fill="#A0522D" />
+          <circle cx="4" cy="-3" r="1.5" fill="#1A1A1A" />
+          <circle cx="3.5" cy="-3.5" r="0.5" fill="#FFFFFF" />
+          {/* Rudolph's glowing red nose */}
+          <circle cx="0" cy="0" r="4" fill="#FF0000" filter="url(#glowFilter)" />
+          <circle cx="-1" cy="-1" r="1.5" fill="#FF6666" />
+          <line x1="9" y1="23" x2="7" y2="34" stroke="#6B4423" strokeWidth="3" strokeLinecap="round" />
+          <line x1="23" y1="23" x2="25" y2="34" stroke="#6B4423" strokeWidth="3" strokeLinecap="round" />
+          <ellipse cx="7" cy="35" rx="2.5" ry="2" fill="#3D2314" />
+          <ellipse cx="25" cy="35" rx="2.5" ry="2" fill="#3D2314" />
+          <path d="M8 10 Q16 6 24 10" stroke="#C41E3A" strokeWidth="2" fill="none" />
+          <circle cx="16" cy="8" r="3" fill="url(#goldGradient)" />
+        </g>
+      </g>
     </svg>
   );
 }
@@ -294,7 +329,7 @@ export function WeatherEffects({ condition, isVisible }: WeatherEffectsProps) {
       const delay = Math.random() * 60000;
       
       return setTimeout(() => {
-        setSantaTop(5 + Math.random() * 25); // Random vertical position
+        setSantaTop(25 + Math.random() * 40); // Random vertical position through the image
         setSantaKey(prev => prev + 1);
         setShowSanta(true);
         
