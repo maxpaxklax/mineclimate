@@ -91,8 +91,6 @@ function BirdSVG({ className, style, flapDuration }: { className?: string; style
           animation: `wing-flap-right ${flapDuration}s ease-in-out infinite`,
         }}
       />
-      {/* Body */}
-      <ellipse cx="12" cy="8" rx="3" ry="2" fill="currentColor" opacity="0.6" />
     </svg>
   );
 }
