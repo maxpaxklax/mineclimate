@@ -78,6 +78,7 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
   const [edgeColors, setEdgeColors] = useState<EdgeColors | null>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [imageBounds, setImageBounds] = useState<{ left: number; width: number } | null>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
@@ -213,6 +214,27 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
       const colors = sampleEdgeColors(img);
       setEdgeColors(colors);
       setImageLoaded(true);
+      
+      // Calculate image bounds after a short delay to ensure layout is complete
+      requestAnimationFrame(() => {
+        if (containerRef.current) {
+          const containerRect = containerRef.current.getBoundingClientRect();
+          const imgAspect = img.naturalWidth / img.naturalHeight;
+          const containerAspect = containerRect.width / containerRect.height;
+          
+          let renderedWidth: number;
+          if (imgAspect > containerAspect) {
+            // Image is wider - fits to width
+            renderedWidth = containerRect.width;
+          } else {
+            // Image is taller - fits to height
+            renderedWidth = containerRect.height * imgAspect;
+          }
+          
+          const leftOffset = (containerRect.width - renderedWidth) / 2;
+          setImageBounds({ left: leftOffset, width: renderedWidth });
+        }
+      });
     };
     
     img.onerror = (e) => {
@@ -326,7 +348,7 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
       
       {/* Weather effects overlay - outside pinch container for proper z-index */}
       {imageUrl && (
-        <WeatherEffects condition={condition} isVisible={imageLoaded && scale < 1.5} />
+        <WeatherEffects condition={condition} isVisible={imageLoaded && scale < 1.5} imageBounds={imageBounds} />
       )}
       
       {isGenerating && imageUrl && (

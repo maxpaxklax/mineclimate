@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 interface WeatherEffectsProps {
   condition?: 'sunny' | 'rainy' | 'snowy' | 'overcast';
   isVisible: boolean;
+  imageBounds?: { left: number; width: number } | null;
 }
 
 // Generate random but deterministic positions for particles
@@ -65,7 +66,7 @@ function BirdSVG({ className, style, flapDuration }: { className?: string; style
   );
 }
 
-export function WeatherEffects({ condition, isVisible }: WeatherEffectsProps) {
+export function WeatherEffects({ condition, isVisible, imageBounds }: WeatherEffectsProps) {
   const rainDrops = useMemo(() => generateParticles(30, 42), []);
   const snowflakes = useMemo(() => generateParticles(25, 73), []);
   const birds = useMemo(() => generateBirds(3, 89), []);
@@ -75,9 +76,15 @@ export function WeatherEffects({ condition, isVisible }: WeatherEffectsProps) {
   return (
     <div className="absolute inset-0 z-[15] pointer-events-none overflow-hidden">
 
-      {/* Animated birds - show for sunny and overcast */}
-      {(condition === 'sunny' || condition === 'overcast') && (
-        <div className="absolute inset-0">
+      {/* Animated birds - show for sunny and overcast, constrained to image bounds */}
+      {(condition === 'sunny' || condition === 'overcast') && imageBounds && (
+        <div 
+          className="absolute inset-y-0 overflow-hidden"
+          style={{
+            left: imageBounds.left,
+            width: imageBounds.width,
+          }}
+        >
           {birds.map((bird) => (
             <div
               key={bird.id}
