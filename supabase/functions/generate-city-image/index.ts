@@ -56,17 +56,17 @@ serve(async (req) => {
 
     // Build the prompt based on weather condition
     const weatherDescriptions = {
-      sunny: 'bright sunny day with clear blue skies, warm golden sunlight casting soft shadows, vibrant colors',
-      rainy: 'rainy day with dark clouds, rain drops falling, wet reflective streets, puddles, umbrellas, moody atmosphere',
-      snowy: 'snowy winter day with snow-covered rooftops, falling snowflakes, cozy warm lights in windows, white landscape',
-      overcast: 'cloudy overcast day with soft diffused light, grey clouds, muted colors, calm atmosphere',
+      sunny: 'bright sunny day with clear blue skies, warm golden sunlight, vibrant saturated colors, cheerful atmosphere',
+      rainy: 'rainy day with dramatic clouds, rain drops falling, wet reflective streets, puddles, umbrellas, rich deep colors',
+      snowy: 'magical snowy winter day with snow-covered rooftops, falling snowflakes, cozy warm glowing lights in windows, pristine white snow',
+      overcast: 'cloudy overcast day with soft diffused light, grey clouds, subtle muted tones, calm peaceful atmosphere',
     };
 
     const undergroundLayer = cityHasSubway
-      ? 'underground subway/metro cross-section with trains and tunnels'
-      : 'underground cross-section showing natural earth layers, roots, and pipes';
+      ? 'colorful underground subway/metro cross-section with vibrant colored train tunnels (blue, yellow, red, green tubes) and detailed metro station with passengers'
+      : 'underground cross-section showing natural brown earth layers, tree roots, utility pipes';
 
-    const prompt = `Create an isometric 3D city illustration of ${city} showing ${weatherDescriptions[condition]}. Portrait format. Three layers: sky with weather, recognizable local architecture and landmarks, ${undergroundLayer}. Modern vector art style.`;
+    const prompt = `Create a highly detailed, vibrant isometric 3D diorama illustration of ${city} showing ${weatherDescriptions[condition]}. Ultra high quality, rich saturated colors, crisp details. Portrait format composition with three distinct layers: sky layer with weather effects, middle layer featuring recognizable ${city} architecture landmarks and city life with tiny people cars and trees, ${undergroundLayer}. Modern stylized vector art style with bold colors, clean lines, and playful charm. The image should be colorful and visually striking.`;
 
     console.log(`[generate-city-image] Calling AI gateway with prompt length: ${prompt.length}`);
 
