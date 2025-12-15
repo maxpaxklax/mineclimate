@@ -231,26 +231,4 @@
       transform: rotate(-25deg) scaleY(0.6);
     }
   }
-
-  /* Santa sleigh animation */
-  .animate-santa-fly {
-    animation: santa-fly 4s linear forwards;
-  }
-
-  @keyframes santa-fly {
-    0% {
-      left: -20%;
-      opacity: 0;
-    }
-    5% {
-      opacity: 1;
-    }
-    95% {
-      opacity: 1;
-    }
-    100% {
-      left: 110%;
-      opacity: 0;
-    }
-  }
 }
