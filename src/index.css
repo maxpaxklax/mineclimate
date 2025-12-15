@@ -198,6 +198,7 @@
   @keyframes bird-fly {
     0% {
       left: -10%;
+      top: 80%;
       opacity: 0;
     }
     5% {
@@ -208,20 +209,26 @@
     }
     100% {
       left: 110%;
+      top: -10%;
       opacity: 0;
     }
   }
 
-  .animate-bird-flap path {
-    animation: bird-flap ease-in-out infinite;
-  }
-
-  @keyframes bird-flap {
+  @keyframes wing-flap-left {
     0%, 100% {
-      transform: scaleY(1);
+      transform: rotate(0deg) scaleY(1);
     }
     50% {
-      transform: scaleY(-0.5);
+      transform: rotate(25deg) scaleY(0.6);
+    }
+  }
+
+  @keyframes wing-flap-right {
+    0%, 100% {
+      transform: rotate(0deg) scaleY(1);
+    }
+    50% {
+      transform: rotate(-25deg) scaleY(0.6);
     }
   }
 
