@@ -39,7 +39,7 @@ function generateBirds(count: number, seed: number) {
     const pseudoRandom = ((seed + i * 23) * 9301 + 49297) % 233280;
     const top = 10 + ((pseudoRandom * 5) % 233280) / 233280 * 30;
     const delay = ((pseudoRandom * 11) % 233280) / 233280 * 20;
-    const duration = 8 + ((pseudoRandom * 7) % 233280) / 233280 * 6;
+    const duration = 20 + ((pseudoRandom * 7) % 233280) / 233280 * 15;
     const scale = 0.6 + ((pseudoRandom * 13) % 233280) / 233280 * 0.6;
     const flapSpeed = 0.3 + ((pseudoRandom * 17) % 233280) / 233280 * 0.3;
     birds.push({ top, delay, duration, scale, flapSpeed, id: i });
