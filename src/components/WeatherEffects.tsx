@@ -33,6 +33,20 @@ function generateClouds(count: number, seed: number) {
   return clouds;
 }
 
+function generateBirds(count: number, seed: number) {
+  const birds = [];
+  for (let i = 0; i < count; i++) {
+    const pseudoRandom = ((seed + i * 23) * 9301 + 49297) % 233280;
+    const top = 10 + ((pseudoRandom * 5) % 233280) / 233280 * 30;
+    const delay = ((pseudoRandom * 11) % 233280) / 233280 * 20;
+    const duration = 8 + ((pseudoRandom * 7) % 233280) / 233280 * 6;
+    const scale = 0.6 + ((pseudoRandom * 13) % 233280) / 233280 * 0.6;
+    const flapSpeed = 0.3 + ((pseudoRandom * 17) % 233280) / 233280 * 0.3;
+    birds.push({ top, delay, duration, scale, flapSpeed, id: i });
+  }
+  return birds;
+}
+
 function CloudSVG({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
     <svg 
@@ -49,15 +63,65 @@ function CloudSVG({ className, style }: { className?: string; style?: React.CSSP
   );
 }
 
+function BirdSVG({ className, style, flapDuration }: { className?: string; style?: React.CSSProperties; flapDuration: number }) {
+  return (
+    <svg 
+      viewBox="0 0 24 12" 
+      className={className}
+      style={style}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path 
+        d="M2 6 Q6 2 12 6 Q18 2 22 6"
+        className="animate-bird-flap"
+        style={{ 
+          animationDuration: `${flapDuration}s`,
+          transformOrigin: 'center'
+        }}
+      />
+    </svg>
+  );
+}
+
 export function WeatherEffects({ condition, isVisible }: WeatherEffectsProps) {
   const rainDrops = useMemo(() => generateParticles(30, 42), []);
   const snowflakes = useMemo(() => generateParticles(25, 73), []);
   const clouds = useMemo(() => generateClouds(4, 17), []);
+  const birds = useMemo(() => generateBirds(3, 89), []);
 
   if (!isVisible) return null;
 
   return (
     <div className="absolute inset-0 z-[15] pointer-events-none overflow-hidden">
+      {/* Animated birds - show for sunny and overcast */}
+      {(condition === 'sunny' || condition === 'overcast') && (
+        <div className="absolute inset-0">
+          {birds.map((bird) => (
+            <div
+              key={bird.id}
+              className="absolute animate-bird-fly text-foreground/60"
+              style={{
+                top: `${bird.top}%`,
+                animationDelay: `${bird.delay}s`,
+                animationDuration: `${bird.duration}s`,
+              }}
+            >
+              <BirdSVG
+                className="w-6 md:w-8"
+                flapDuration={bird.flapSpeed}
+                style={{
+                  transform: `scale(${bird.scale})`,
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Floating clouds - show for overcast, rainy, snowy */}
       {(condition === 'overcast' || condition === 'rainy' || condition === 'snowy') && (
         <div className="absolute inset-0">

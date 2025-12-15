@@ -189,4 +189,39 @@
       transform: translateX(-10px);
     }
   }
+
+  /* Bird animation effects */
+  .animate-bird-fly {
+    animation: bird-fly linear infinite;
+  }
+
+  @keyframes bird-fly {
+    0% {
+      left: -10%;
+      opacity: 0;
+    }
+    5% {
+      opacity: 1;
+    }
+    95% {
+      opacity: 1;
+    }
+    100% {
+      left: 110%;
+      opacity: 0;
+    }
+  }
+
+  .animate-bird-flap path {
+    animation: bird-flap ease-in-out infinite;
+  }
+
+  @keyframes bird-flap {
+    0%, 100% {
+      transform: scaleY(1);
+    }
+    50% {
+      transform: scaleY(-0.5);
+    }
+  }
 }
