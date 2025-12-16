@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Share2, Download, RefreshCw, Loader2, MapPin } from 'lucide-react';
+import { Search, Share2, Download, RefreshCw, Loader2, MapPin, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
@@ -8,6 +8,7 @@ import { format } from 'date-fns';
 import { searchCities, LocationData } from '@/lib/weather';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { usePWAInstall } from '@/hooks/usePWAInstall';
 
 interface SearchBarProps {
   onSelectLocation: (location: LocationData) => void;
@@ -29,12 +30,20 @@ const weatherEmojis: Record<string, string> = {
 
 export function SearchBar({ onSelectLocation, onRefresh, imageUrl, isLoading, city, temperature, condition, imageBounds }: SearchBarProps) {
   const isMobile = useIsMobile();
+  const { canInstall, install } = usePWAInstall();
   const [query, setQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchResults, setSearchResults] = useState<LocationData[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   
   const debouncedQuery = useDebounce(query, 300);
+
+  const handleInstall = async () => {
+    const success = await install();
+    if (success) {
+      toast.success('App installed!');
+    }
+  };
 
   useEffect(() => {
     async function search() {
@@ -269,6 +278,21 @@ export function SearchBar({ onSelectLocation, onRefresh, imageUrl, isLoading, ci
             
             <TooltipProvider>
               <div className="flex gap-1">
+                {canInstall && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-10 w-10"
+                        onClick={handleInstall}
+                      >
+                        <Smartphone className="h-5 w-5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Install App</TooltipContent>
+                  </Tooltip>
+                )}
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
