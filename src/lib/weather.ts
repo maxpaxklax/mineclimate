@@ -126,7 +126,8 @@ export async function fetchForecast(latitude: number, longitude: number): Promis
 }
 
 export async function searchCities(query: string): Promise<LocationData[]> {
-  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=5&language=en&format=json`;
+  const trimmedQuery = query.trim();
+  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(trimmedQuery)}&count=5&language=en&format=json`;
   
   const response = await fetch(url);
   if (!response.ok) {
