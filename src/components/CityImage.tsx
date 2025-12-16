@@ -294,7 +294,7 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
             src={imageUrl}
             alt={`Isometric city view of ${city}`}
             className={cn(
-              "relative z-[5] h-full w-full object-contain transition-transform duration-100",
+              "relative z-[5] h-full w-full object-contain transition-transform duration-100 pb-28 md:pb-0",
               isGenerating && "opacity-60"
             )}
             style={{
