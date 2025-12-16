@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Loader2 } from 'lucide-react';
 import munich3 from '@/assets/cities/munich-3.png';
 import fussen from '@/assets/cities/fussen.png';
 import cologne from '@/assets/cities/cologne.png';
@@ -82,9 +83,12 @@ export function LoadingCarousel() {
       </div>
 
       {/* Text below carousel */}
-      <p className="mt-8 text-lg font-medium text-foreground/80 drop-shadow-md">
-        Generating your city...
-      </p>
+      <div className="mt-8 flex items-center gap-3">
+        <Loader2 className="h-5 w-5 animate-spin text-primary" />
+        <p className="text-lg font-medium text-foreground/80">
+          Generating your city...
+        </p>
+      </div>
     </div>
   );
 }
