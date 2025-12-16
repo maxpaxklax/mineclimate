@@ -21,8 +21,8 @@ export default defineConfig(({ mode }) => ({
       },
       includeAssets: ["favicon.ico", "robots.txt"],
       manifest: {
-        name: "Mineclima",
-        short_name: "Mineclima",
+        name: "mineclimate",
+        short_name: "mineclimate",
         description: "AI-generated isometric city weather",
         theme_color: "#1a1a2e",
         background_color: "#1a1a2e",
