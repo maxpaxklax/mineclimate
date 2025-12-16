@@ -23,6 +23,7 @@ const cityImages = [
 export function LoadingCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isBouncing, setIsBouncing] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -30,6 +31,8 @@ export function LoadingCarousel() {
       setTimeout(() => {
         setCurrentIndex((prev) => (prev + 1) % cityImages.length);
         setIsAnimating(false);
+        setIsBouncing(true);
+        setTimeout(() => setIsBouncing(false), 300);
       }, 400);
     }, 1500);
 
@@ -53,23 +56,30 @@ export function LoadingCarousel() {
         {stackIndices.map((imgIndex, stackPosition) => {
           const isTop = stackPosition === 2;
           const offset = (2 - stackPosition) * 8;
-          const scale = 1 - (2 - stackPosition) * 0.05;
+          const baseScale = 1 - (2 - stackPosition) * 0.05;
           const opacity = 1 - (2 - stackPosition) * 0.15;
+          
+          // Bounce effect: scale up slightly then back to normal
+          const bounceScale = isBouncing && isTop ? 1.08 : baseScale;
 
           return (
             <div
               key={`${imgIndex}-${stackPosition}`}
-              className="absolute inset-0 transition-all duration-400 ease-out"
+              className="absolute inset-0"
               style={{
                 transform: `
                   translateX(${isTop && isAnimating ? '-120%' : `${offset}px`}) 
-                  translateY(${offset}px) 
-                  scale(${scale})
+                  translateY(${isTop && isBouncing ? `${offset - 4}px` : `${offset}px`}) 
+                  scale(${isTop && isAnimating ? baseScale : bounceScale})
                   rotate(${isTop && isAnimating ? '-15deg' : '0deg'})
                 `,
                 opacity: isTop && isAnimating ? 0 : opacity,
                 zIndex: stackPosition,
-                transitionDuration: isTop && isAnimating ? '400ms' : '300ms',
+                transition: isTop && isAnimating 
+                  ? 'all 400ms ease-out' 
+                  : isBouncing 
+                    ? 'all 300ms cubic-bezier(0.34, 1.56, 0.64, 1)' 
+                    : 'all 300ms ease-out',
               }}
             >
               <img
