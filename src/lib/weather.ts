@@ -8,6 +8,14 @@ export interface WeatherData {
   icon: string;
 }
 
+export interface ForecastDay {
+  date: Date;
+  tempHigh: number;
+  tempLow: number;
+  condition: WeatherCondition;
+  icon: string;
+}
+
 export interface LocationData {
   city: string;
   country: string;
@@ -93,6 +101,28 @@ export async function fetchWeather(latitude: number, longitude: number): Promise
     description,
     icon: getWeatherIcon(condition),
   };
+}
+
+export async function fetchForecast(latitude: number, longitude: number): Promise<ForecastDay[]> {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto&forecast_days=7`;
+  
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error('Failed to fetch forecast data');
+  }
+  
+  const data = await response.json();
+  
+  return data.daily.time.map((dateStr: string, i: number) => {
+    const { condition } = mapWMOCodeToCondition(data.daily.weather_code[i]);
+    return {
+      date: new Date(dateStr),
+      tempHigh: Math.round(data.daily.temperature_2m_max[i]),
+      tempLow: Math.round(data.daily.temperature_2m_min[i]),
+      condition,
+      icon: getWeatherIcon(condition),
+    };
+  });
 }
 
 export async function searchCities(query: string): Promise<LocationData[]> {
