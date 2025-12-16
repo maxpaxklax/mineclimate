@@ -205,14 +205,20 @@
 
   @keyframes bird-fly {
     0% {
-      left: 0%;
+      left: -10%;
       top: 50%;
+      opacity: 0;
+    }
+    5% {
+      opacity: 1;
+    }
+    95% {
       opacity: 1;
     }
     100% {
-      left: 100%;
+      left: 110%;
       top: 10%;
-      opacity: 1;
+      opacity: 0;
     }
   }
 
