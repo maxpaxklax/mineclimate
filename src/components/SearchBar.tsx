@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { searchCities, LocationData } from '@/lib/weather';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface SearchBarProps {
   onSelectLocation: (location: LocationData) => void;
@@ -16,6 +17,7 @@ interface SearchBarProps {
   city?: string;
   temperature?: number;
   condition?: 'sunny' | 'rainy' | 'snowy' | 'overcast';
+  imageBounds?: { left: number; width: number } | null;
 }
 
 const weatherEmojis: Record<string, string> = {
@@ -25,7 +27,8 @@ const weatherEmojis: Record<string, string> = {
   overcast: '☁️',
 };
 
-export function SearchBar({ onSelectLocation, onRefresh, imageUrl, isLoading, city, temperature, condition }: SearchBarProps) {
+export function SearchBar({ onSelectLocation, onRefresh, imageUrl, isLoading, city, temperature, condition, imageBounds }: SearchBarProps) {
+  const isMobile = useIsMobile();
   const [query, setQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchResults, setSearchResults] = useState<LocationData[]>([]);
@@ -195,7 +198,13 @@ export function SearchBar({ onSelectLocation, onRefresh, imageUrl, isLoading, ci
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-20 safe-area-bottom">
+    <div 
+      className="fixed bottom-0 left-0 right-0 z-20 safe-area-bottom md:left-1/2 md:right-auto md:-translate-x-1/2"
+      style={imageBounds && !isMobile ? { 
+        width: `${imageBounds.width}px`,
+        maxWidth: `${imageBounds.width}px`,
+      } : undefined}
+    >
       <div className="search-bar mx-4 mb-4 rounded-2xl p-3">
         {isSearchOpen ? (
           <div className="flex flex-col gap-2">

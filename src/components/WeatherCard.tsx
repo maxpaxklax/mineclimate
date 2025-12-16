@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { fetchForecast, ForecastDay, LocationData } from '@/lib/weather';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface WeatherCardProps {
   location: LocationData;
+  imageBounds?: { left: number; width: number } | null;
 }
 
-export function WeatherCard({ location }: WeatherCardProps) {
+export function WeatherCard({ location, imageBounds }: WeatherCardProps) {
+  const isMobile = useIsMobile();
   const [forecast, setForecast] = useState<ForecastDay[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -21,7 +24,13 @@ export function WeatherCard({ location }: WeatherCardProps) {
   }, [location.latitude, location.longitude]);
 
   return (
-    <div className="absolute bottom-24 left-4 right-4 z-10">
+    <div 
+      className="absolute bottom-24 z-10 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2"
+      style={imageBounds && !isMobile ? { 
+        width: `${imageBounds.width - 32}px`,
+        maxWidth: `${imageBounds.width - 32}px`,
+      } : undefined}
+    >
       <div className="weather-card rounded-2xl p-3 backdrop-blur-xl">
         <div className="flex gap-2 overflow-x-auto scrollbar-hide">
           {isLoading ? (
