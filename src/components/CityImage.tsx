@@ -3,6 +3,7 @@ import { Loader2, Sun, Cloud, CloudRain, Snowflake } from 'lucide-react';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { format } from 'date-fns';
 import { WeatherEffects } from './WeatherEffects';
+import { LoadingCarousel } from './LoadingCarousel';
 
 interface CityImageProps {
   imageUrl: string | null;
@@ -336,14 +337,7 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
           </div>
         </div>
       ) : (
-        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20">
-          <div className="text-center">
-            <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
-            <p className="mt-4 text-sm text-muted-foreground">
-              Generating your city...
-            </p>
-          </div>
-        </div>
+        <LoadingCarousel />
       )}
       
       {/* Weather effects overlay - outside pinch container for proper z-index */}

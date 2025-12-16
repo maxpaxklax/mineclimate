@@ -239,4 +239,18 @@
       transform: rotate(-25deg) scaleY(0.6);
     }
   }
+
+  /* Loading carousel animation */
+  .carousel-track {
+    animation: carousel-scroll 8s linear infinite;
+  }
+
+  @keyframes carousel-scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
 }
