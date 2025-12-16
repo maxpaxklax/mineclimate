@@ -346,10 +346,8 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
       )}
       
       {isGenerating && imageUrl && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/20 backdrop-blur-sm">
-          <div className="rounded-full bg-background/90 p-4 shadow-lg">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
+        <div className="absolute inset-0 z-20 bg-background/80 backdrop-blur-sm">
+          <LoadingCarousel />
         </div>
       )}
     </div>
