@@ -11,6 +11,7 @@ interface CityImageProps {
   city: string;
   temperature?: number;
   condition?: 'sunny' | 'rainy' | 'snowy' | 'overcast';
+  onImageBoundsChange?: (bounds: { left: number; width: number } | null) => void;
 }
 
 const weatherIcons = {
@@ -75,7 +76,7 @@ function sampleEdgeColors(img: HTMLImageElement): EdgeColors {
   };
 }
 
-export function CityImage({ imageUrl, isGenerating, city, temperature, condition }: CityImageProps) {
+export function CityImage({ imageUrl, isGenerating, city, temperature, condition, onImageBoundsChange }: CityImageProps) {
   const [edgeColors, setEdgeColors] = useState<EdgeColors | null>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -195,6 +196,38 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
   const WeatherIcon = condition ? weatherIcons[condition] : null;
   const today = format(new Date(), 'EEEE, MMMM d');
 
+  const calculateImageBounds = useCallback((img: HTMLImageElement) => {
+    if (!containerRef.current) return;
+    
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const imgAspect = img.naturalWidth / img.naturalHeight;
+    const containerAspect = containerRect.width / containerRect.height;
+    
+    let renderedWidth: number;
+    if (imgAspect > containerAspect) {
+      renderedWidth = containerRect.width;
+    } else {
+      renderedWidth = containerRect.height * imgAspect;
+    }
+    
+    const leftOffset = (containerRect.width - renderedWidth) / 2;
+    const newBounds = { left: leftOffset, width: renderedWidth };
+    setImageBounds(newBounds);
+    onImageBoundsChange?.(newBounds);
+  }, [onImageBoundsChange]);
+
+  // Recalculate bounds on resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (imgRef.current && imgRef.current.naturalWidth > 0) {
+        calculateImageBounds(imgRef.current);
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [calculateImageBounds]);
+
   useEffect(() => {
     if (!imageUrl) {
       setEdgeColors(null);
@@ -218,23 +251,7 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
       
       // Calculate image bounds after a short delay to ensure layout is complete
       requestAnimationFrame(() => {
-        if (containerRef.current) {
-          const containerRect = containerRef.current.getBoundingClientRect();
-          const imgAspect = img.naturalWidth / img.naturalHeight;
-          const containerAspect = containerRect.width / containerRect.height;
-          
-          let renderedWidth: number;
-          if (imgAspect > containerAspect) {
-            // Image is wider - fits to width
-            renderedWidth = containerRect.width;
-          } else {
-            // Image is taller - fits to height
-            renderedWidth = containerRect.height * imgAspect;
-          }
-          
-          const leftOffset = (containerRect.width - renderedWidth) / 2;
-          setImageBounds({ left: leftOffset, width: renderedWidth });
-        }
+        calculateImageBounds(img);
       });
     };
     
@@ -245,7 +262,7 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
     };
     
     img.src = imageUrl;
-  }, [imageUrl]);
+  }, [imageUrl, calculateImageBounds]);
 
   return (
     <div className="relative flex-1 overflow-hidden bg-gradient-to-br from-primary/20 to-secondary/30">

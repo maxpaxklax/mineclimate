@@ -26,6 +26,7 @@ const Index = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showPermission, setShowPermission] = useState(false);
+  const [imageBounds, setImageBounds] = useState<{ left: number; width: number } | null>(null);
 
   const generateImage = useCallback(async (loc: LocationData, w: WeatherData) => {
     setIsGenerating(true);
@@ -192,10 +193,11 @@ const Index = () => {
         city={location?.city || 'your city'}
         temperature={weather?.temperature}
         condition={weather?.condition}
+        onImageBoundsChange={setImageBounds}
       />
       
       {location && (
-        <WeatherCard location={location} />
+        <WeatherCard location={location} imageBounds={imageBounds} />
       )}
       
       <SearchBar 
@@ -206,6 +208,7 @@ const Index = () => {
         city={location?.city || 'your city'}
         temperature={weather?.temperature}
         condition={weather?.condition}
+        imageBounds={imageBounds}
       />
     </div>
   );
