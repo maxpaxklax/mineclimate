@@ -194,8 +194,8 @@ const Index = () => {
         condition={weather?.condition}
       />
       
-      {weather && location && (
-        <WeatherCard weather={weather} location={location} />
+      {location && (
+        <WeatherCard location={location} />
       )}
       
       <SearchBar 
