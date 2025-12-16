@@ -30,7 +30,7 @@ const weatherEmojis: Record<string, string> = {
 
 export function SearchBar({ onSelectLocation, onRefresh, imageUrl, isLoading, city, temperature, condition, imageBounds }: SearchBarProps) {
   const isMobile = useIsMobile();
-  const { canInstall, install } = usePWAInstall();
+  const { canInstall, isIOS, hasNativePrompt, install } = usePWAInstall();
   const [query, setQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchResults, setSearchResults] = useState<LocationData[]>([]);
@@ -39,9 +39,20 @@ export function SearchBar({ onSelectLocation, onRefresh, imageUrl, isLoading, ci
   const debouncedQuery = useDebounce(query, 300);
 
   const handleInstall = async () => {
-    const success = await install();
-    if (success) {
+    const result = await install();
+    
+    if (result === 'installed') {
       toast.success('App installed!');
+    } else if (result === 'ios') {
+      toast('Tap the Share button, then "Add to Home Screen"', {
+        duration: 5000,
+        icon: '📱',
+      });
+    } else if (result === 'manual') {
+      toast('Use your browser menu to "Add to Home Screen" or "Install App"', {
+        duration: 5000,
+        icon: '📱',
+      });
     }
   };
 
