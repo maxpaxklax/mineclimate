@@ -121,7 +121,7 @@ export function SearchBar({ onSelectLocation, onRefresh, imageUrl, isLoading, ci
     ctx.font = `600 ${brandFontSize}px system-ui, -apple-system, sans-serif`;
     ctx.textAlign = 'right';
     
-    const brandText = 'Mineclima';
+    const brandText = 'mineclimate';
     const brandTextWidth = ctx.measureText(brandText).width;
     const brandY = canvas.height - padding;
     
