@@ -35,8 +35,26 @@ export function SearchBar({ onSelectLocation, onRefresh, imageUrl, isLoading, ci
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchResults, setSearchResults] = useState<LocationData[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [hasShownHint, setHasShownHint] = useState(() => {
+    return localStorage.getItem('mineclimate-regenerate-hint-shown') === 'true';
+  });
   
   const debouncedQuery = useDebounce(query, 300);
+
+  // Show one-time hint after first image loads
+  useEffect(() => {
+    if (imageUrl && !isLoading && !hasShownHint) {
+      const timer = setTimeout(() => {
+        toast('Tap the refresh button to generate a new version of your city!', {
+          duration: 6000,
+          icon: '✨',
+        });
+        localStorage.setItem('mineclimate-regenerate-hint-shown', 'true');
+        setHasShownHint(true);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [imageUrl, isLoading, hasShownHint]);
 
   const handleInstall = async () => {
     const result = await install();
