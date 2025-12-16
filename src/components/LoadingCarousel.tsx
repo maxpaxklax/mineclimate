@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import munich3 from '@/assets/cities/munich-3.png';
 import fussen from '@/assets/cities/fussen.png';
 import cologne from '@/assets/cities/cologne.png';
@@ -19,26 +20,69 @@ const cityImages = [
 ];
 
 export function LoadingCarousel() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsAnimating(true);
+      setTimeout(() => {
+        setCurrentIndex((prev) => (prev + 1) % cityImages.length);
+        setIsAnimating(false);
+      }, 400);
+    }, 1500);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Get visible stack (current + next 2)
+  const getStackOrder = () => {
+    const stack = [];
+    for (let i = 0; i < 3; i++) {
+      stack.push((currentIndex + i) % cityImages.length);
+    }
+    return stack.reverse(); // Reverse so first is on top
+  };
+
+  const stackIndices = getStackOrder();
+
   return (
     <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden">
-      <div className="carousel-track flex items-center gap-4">
-        {/* Double the images for seamless loop */}
-        {[...cityImages, ...cityImages].map((city, index) => (
-          <div
-            key={`${city.name}-${index}`}
-            className="carousel-item shrink-0"
-          >
-            <img
-              src={city.src}
-              alt={city.name}
-              className="h-auto w-[20vw] max-w-[200px] min-w-[120px] rounded-xl shadow-lg object-contain"
-            />
-          </div>
-        ))}
+      <div className="relative h-[25vh] w-[25vh] max-h-[200px] max-w-[200px] min-h-[140px] min-w-[140px]">
+        {stackIndices.map((imgIndex, stackPosition) => {
+          const isTop = stackPosition === 2;
+          const offset = (2 - stackPosition) * 8;
+          const scale = 1 - (2 - stackPosition) * 0.05;
+          const opacity = 1 - (2 - stackPosition) * 0.15;
+
+          return (
+            <div
+              key={`${imgIndex}-${stackPosition}`}
+              className="absolute inset-0 transition-all duration-400 ease-out"
+              style={{
+                transform: `
+                  translateX(${isTop && isAnimating ? '-120%' : `${offset}px`}) 
+                  translateY(${offset}px) 
+                  scale(${scale})
+                  rotate(${isTop && isAnimating ? '-15deg' : '0deg'})
+                `,
+                opacity: isTop && isAnimating ? 0 : opacity,
+                zIndex: stackPosition,
+                transitionDuration: isTop && isAnimating ? '400ms' : '300ms',
+              }}
+            >
+              <img
+                src={cityImages[imgIndex].src}
+                alt={cityImages[imgIndex].name}
+                className="h-full w-full rounded-xl shadow-lg object-cover"
+              />
+            </div>
+          );
+        })}
       </div>
-      
+
       {/* Text below carousel */}
-      <p className="mt-6 text-lg font-medium text-foreground/80 drop-shadow-md">
+      <p className="mt-8 text-lg font-medium text-foreground/80 drop-shadow-md">
         Generating your city...
       </p>
     </div>
