@@ -20,7 +20,7 @@ const cityImages = [
 
 export function LoadingCarousel() {
   return (
-    <div className="relative flex h-full w-full items-center justify-center overflow-hidden">
+    <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden">
       <div className="carousel-track flex items-center gap-4">
         {/* Double the images for seamless loop */}
         {[...cityImages, ...cityImages].map((city, index) => (
@@ -37,12 +37,10 @@ export function LoadingCarousel() {
         ))}
       </div>
       
-      {/* Overlay text */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-        <p className="text-lg font-medium text-foreground/80 drop-shadow-md">
-          Generating your city...
-        </p>
-      </div>
+      {/* Text below carousel */}
+      <p className="mt-6 text-lg font-medium text-foreground/80 drop-shadow-md">
+        Generating your city...
+      </p>
     </div>
   );
 }
