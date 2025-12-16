@@ -201,6 +201,7 @@
   /* Bird animation effects */
   .animate-bird-fly {
     animation: bird-fly linear infinite;
+    animation-fill-mode: backwards;
   }
 
   @keyframes bird-fly {
