@@ -59,8 +59,8 @@ export function LoadingCarousel() {
           const baseScale = 1 - (2 - stackPosition) * 0.05;
           const opacity = 1 - (2 - stackPosition) * 0.15;
           
-          // Bounce effect: scale up slightly then back to normal
-          const bounceScale = isBouncing && isTop ? 1.08 : baseScale;
+          // Bounce effect: subtle scale up then back to normal
+          const bounceScale = isBouncing && isTop ? 1.04 : baseScale;
 
           return (
             <div
@@ -69,7 +69,7 @@ export function LoadingCarousel() {
               style={{
                 transform: `
                   translateX(${isTop && isAnimating ? '-120%' : `${offset}px`}) 
-                  translateY(${isTop && isBouncing ? `${offset - 4}px` : `${offset}px`}) 
+                  translateY(${isTop && isBouncing ? `${offset - 2}px` : `${offset}px`}) 
                   scale(${isTop && isAnimating ? baseScale : bounceScale})
                   rotate(${isTop && isAnimating ? '-15deg' : '0deg'})
                 `,
@@ -78,7 +78,7 @@ export function LoadingCarousel() {
                 transition: isTop && isAnimating 
                   ? 'all 400ms ease-out' 
                   : isBouncing 
-                    ? 'all 300ms cubic-bezier(0.34, 1.56, 0.64, 1)' 
+                    ? 'all 350ms cubic-bezier(0.22, 1, 0.36, 1)' 
                     : 'all 300ms ease-out',
               }}
             >
