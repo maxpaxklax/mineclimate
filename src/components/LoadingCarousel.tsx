@@ -61,11 +61,6 @@ export function LoadingCarousel() {
           
           // Bounce effect: subtle scale up then back to normal
           const bounceScale = isBouncing && isTop ? 1.04 : baseScale;
-          
-          // Dynamic shadow that grows during bounce
-          const baseShadow = '0 8px 20px -4px rgba(0, 0, 0, 0.25)';
-          const bounceShadow = '0 16px 32px -4px rgba(0, 0, 0, 0.35)';
-          const shadow = isBouncing && isTop ? bounceShadow : baseShadow;
 
           return (
             <div
@@ -80,7 +75,6 @@ export function LoadingCarousel() {
                 `,
                 opacity: isTop && isAnimating ? 0 : opacity,
                 zIndex: stackPosition,
-                boxShadow: isTop ? shadow : baseShadow,
                 transition: isTop && isAnimating 
                   ? 'all 400ms ease-out' 
                   : isBouncing 
