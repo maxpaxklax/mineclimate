@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MapPin, Search, Loader2, Sun } from 'lucide-react';
+import { MapPin, Search, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { searchCities, LocationData } from '@/lib/weather';
@@ -56,12 +56,12 @@ export function LocationPermission({ error, onSelectLocation, isLoading }: Locat
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-6">
       <div className="w-full max-w-sm text-center">
-        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-accent/20">
-          <Sun className="h-10 w-10 text-accent" />
+        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-accent/20 overflow-hidden">
+          <img src="/pwa-192x192.png" alt="mineclimate" className="h-14 w-14 object-contain" />
         </div>
         
         <h1 className="mb-2 text-2xl font-bold text-foreground">
-          Weather City
+          mineclimate
         </h1>
         
         <p className="mb-6 text-muted-foreground">
