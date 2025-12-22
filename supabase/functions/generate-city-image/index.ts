@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -34,6 +35,44 @@ function hasSubway(city: string): boolean {
   return citiesWithSubway.has(normalized);
 }
 
+// Create a URL-safe slug from city name
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+// Compute SHA-256 hash
+async function sha256(message: string): Promise<string> {
+  const msgBuffer = new TextEncoder().encode(message);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Decode base64 data URL to Uint8Array
+function decodeBase64DataUrl(dataUrl: string): Uint8Array {
+  // Strip the data URL prefix if present
+  let base64String = dataUrl;
+  if (dataUrl.startsWith('data:')) {
+    const commaIndex = dataUrl.indexOf(',');
+    if (commaIndex !== -1) {
+      base64String = dataUrl.substring(commaIndex + 1);
+    }
+  }
+  
+  // Decode base64 to binary
+  const binaryString = atob(base64String);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes;
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -45,11 +84,21 @@ serve(async (req) => {
   try {
     const { city, condition, temperature } = await req.json() as RequestBody;
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
     if (!LOVABLE_API_KEY) {
       console.error('[generate-city-image] LOVABLE_API_KEY is not configured');
       throw new Error('LOVABLE_API_KEY is not configured');
     }
+
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('[generate-city-image] Supabase credentials not configured');
+      throw new Error('Supabase credentials not configured');
+    }
+
+    // Initialize Supabase client with service role for storage access
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     const cityHasSubway = hasSubway(city);
     console.log(`[generate-city-image] Starting for ${city} (subway: ${cityHasSubway}) with ${condition} weather at ${temperature}°`);
@@ -129,11 +178,11 @@ serve(async (req) => {
     console.log('[generate-city-image] Response parsed, checking for image...');
 
     // Extract the image from the response - check multiple possible locations
-    const imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url
+    const base64ImageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url
       || data.choices?.[0]?.message?.image?.url
       || data.data?.[0]?.url;
     
-    if (!imageUrl) {
+    if (!base64ImageUrl) {
       // Log detailed response for debugging
       const responseStr = JSON.stringify(data);
       console.error('[generate-city-image] No image found. Full response:', responseStr.substring(0, 1000));
@@ -147,10 +196,56 @@ serve(async (req) => {
       throw new Error('No image generated - model returned text instead of image');
     }
 
-    const totalTime = Date.now() - startTime;
-    console.log(`[generate-city-image] Success! Image URL length: ${imageUrl.length}, total time: ${totalTime}ms`);
+    console.log(`[generate-city-image] Image received, base64 length: ${base64ImageUrl.length}`);
 
-    return new Response(JSON.stringify({ imageUrl }), {
+    // Decode base64 to binary
+    const imageBytes = decodeBase64DataUrl(base64ImageUrl);
+    console.log(`[generate-city-image] Decoded image bytes: ${imageBytes.length}`);
+
+    // Generate deterministic file path
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+    const citySlug = slugify(city);
+    const stableKey = `${citySlug}-${dateStr}-${condition}`;
+    const etag = await sha256(stableKey);
+    const shortHash = etag.substring(0, 16);
+    
+    const filePath = `city/${citySlug}/${dateStr}/${shortHash}.png`;
+    console.log(`[generate-city-image] Upload path: ${filePath}, etag: ${shortHash}`);
+
+    // Upload to Supabase Storage
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('city-images')
+      .upload(filePath, imageBytes, {
+        contentType: 'image/png',
+        cacheControl: 'public, max-age=86400',
+        upsert: true,
+      });
+
+    if (uploadError) {
+      console.error('[generate-city-image] Storage upload error:', uploadError);
+      throw new Error(`Storage upload failed: ${uploadError.message}`);
+    }
+
+    console.log(`[generate-city-image] Upload successful: ${uploadData.path}`);
+
+    // Get public URL (bucket is public)
+    const { data: urlData } = supabase.storage
+      .from('city-images')
+      .getPublicUrl(filePath);
+
+    const imageUrl = urlData.publicUrl;
+    const generatedAt = now.toISOString();
+
+    const totalTime = Date.now() - startTime;
+    console.log(`[generate-city-image] Success! URL length: ${imageUrl.length}, etag: ${shortHash}, total time: ${totalTime}ms`);
+
+    return new Response(JSON.stringify({ 
+      imageUrl,
+      city,
+      generatedAt,
+      etag: shortHash,
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
