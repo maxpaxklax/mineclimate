@@ -18,6 +18,13 @@ import { WeatherCard } from '@/components/WeatherCard';
 import { SearchBar } from '@/components/SearchBar';
 import { LocationPermission } from '@/components/LocationPermission';
 
+interface GeneratedImageResponse {
+  imageUrl: string;
+  city: string;
+  generatedAt: string;
+  etag: string;
+}
+
 const Index = () => {
   const geolocation = useGeolocation();
   const [location, setLocation] = useState<LocationData | null>(null);
@@ -73,24 +80,31 @@ const Index = () => {
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
 
-      const data = await response.json();
-      console.log('[Image Generation] Parsed response');
+      const data: GeneratedImageResponse = await response.json();
+      console.log('[Image Generation] Parsed response:', { 
+        city: data.city, 
+        etag: data.etag, 
+        generatedAt: data.generatedAt,
+        urlLength: data.imageUrl?.length 
+      });
 
-      if (data?.error) {
-        console.error('[Image Generation] Data error:', data.error);
-        throw new Error(data.error);
-      }
-
-      if (data?.imageUrl) {
-        console.log('[Image Generation] Image URL received, length:', data.imageUrl.length);
-        setImageUrl(data.imageUrl);
-        console.log('[Image Generation] State updated with new image');
-        await setCachedImage(loc.city, w.condition, data.imageUrl);
-        console.log('[Image Generation] Image cached successfully');
-      } else {
+      if (!data.imageUrl) {
         console.warn('[Image Generation] No imageUrl in response:', data);
         throw new Error('No image URL returned from server');
       }
+
+      console.log('[Image Generation] Setting imageUrl (HTTPS):', data.imageUrl.substring(0, 80) + '...');
+      setImageUrl(data.imageUrl);
+      
+      // Cache the metadata (URL, etag, generatedAt)
+      await setCachedImage({
+        city: loc.city,
+        condition: w.condition,
+        imageUrl: data.imageUrl,
+        etag: data.etag,
+        generatedAt: data.generatedAt,
+      });
+      console.log('[Image Generation] Image cached successfully');
     } catch (e) {
       clearTimeout(timeoutId);
       
@@ -118,11 +132,13 @@ const Index = () => {
       const cached = await getCachedImage(loc.city);
       
       if (cached && isCacheValid(cached, weatherData.condition)) {
-        // Use cached image
-        setImageUrl(cached.imageData);
+        // Use cached image URL
+        console.log('[Weather] Using cached image:', { city: loc.city, etag: cached.etag });
+        setImageUrl(cached.imageUrl);
         setIsLoading(false);
       } else {
         // Generate new image
+        console.log('[Weather] Cache miss, generating new image for:', loc.city);
         setIsLoading(false);
         await generateImage(loc, weatherData);
       }
