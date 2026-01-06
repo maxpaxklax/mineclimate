@@ -10,18 +10,44 @@ interface WidgetBridgePlugin {
 
 const WidgetBridge = registerPlugin<WidgetBridgePlugin>('WidgetBridge');
 
+// Enhanced platform detection with multiple fallbacks
+const isNativeAndroid = (): boolean => {
+  const platform = Capacitor.getPlatform();
+  const isNative = Capacitor.isNativePlatform();
+  const isPluginAvailable = Capacitor.isPluginAvailable('WidgetBridge');
+  
+  console.log('[WidgetBridge] Platform detection:', {
+    platform,
+    isNative,
+    isPluginAvailable,
+    userAgent: navigator?.userAgent?.substring(0, 50)
+  });
+
+  // Method 1: Standard Capacitor check
+  if (platform === 'android') return true;
+  
+  // Method 2: Check if native plugin is available
+  if (isPluginAvailable) return true;
+  
+  // Method 3: Native platform + Android user agent
+  if (isNative && /android/i.test(navigator?.userAgent || '')) return true;
+  
+  return false;
+};
+
 export const saveLocationToWidget = async (
   latitude: number,
   longitude: number,
   city: string
 ): Promise<void> => {
-  const platform = Capacitor.getPlatform();
-  console.log('[WidgetBridge] Platform:', platform);
-  console.log('[WidgetBridge] Attempting to save:', { latitude, longitude, city });
+  console.log('[WidgetBridge] === saveLocationToWidget called ===');
+  console.log('[WidgetBridge] Data:', { latitude, longitude, city });
 
-  // Only run on native Android
-  if (platform !== 'android') {
-    console.log('[WidgetBridge] Not on Android, skipping widget update');
+  const shouldCallNative = isNativeAndroid();
+  console.log('[WidgetBridge] Should call native:', shouldCallNative);
+
+  if (!shouldCallNative) {
+    console.log('[WidgetBridge] Not on native Android, skipping widget update');
     return;
   }
 
