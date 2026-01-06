@@ -20,11 +20,13 @@
             android:contentDescription="City weather image" />
 
         <!-- Gradient overlay for text readability -->
-        <View
+        <ImageView
             android:layout_width="match_parent"
             android:layout_height="80dp"
             android:layout_gravity="bottom"
-            android:background="@drawable/widget_gradient_overlay" />
+            android:src="@drawable/widget_gradient_overlay"
+            android:scaleType="fitXY"
+            android:contentDescription="Gradient overlay" />
 
         <!-- Info bar at bottom -->
         <LinearLayout
