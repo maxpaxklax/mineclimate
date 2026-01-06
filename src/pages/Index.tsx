@@ -26,6 +26,31 @@ interface GeneratedImageResponse {
   etag: string;
 }
 
+const LOCATION_STORAGE_KEY = 'mineclimate_saved_location';
+
+const getSavedLocation = (): LocationData | null => {
+  try {
+    const saved = localStorage.getItem(LOCATION_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      console.log('[Location] Found saved location:', parsed.city);
+      return parsed;
+    }
+  } catch (e) {
+    console.error('[Location] Failed to read saved location:', e);
+  }
+  return null;
+};
+
+const saveLocation = (loc: LocationData) => {
+  try {
+    localStorage.setItem(LOCATION_STORAGE_KEY, JSON.stringify(loc));
+    console.log('[Location] Saved location to localStorage:', loc.city);
+  } catch (e) {
+    console.error('[Location] Failed to save location:', e);
+  }
+};
+
 const Index = () => {
   const geolocation = useGeolocation();
   const [location, setLocation] = useState<LocationData | null>(null);
@@ -129,6 +154,9 @@ const Index = () => {
       setWeather(weatherData);
       setLocation(loc);
       
+      // Save location to localStorage for persistence
+      saveLocation(loc);
+      
       // Save location to Android widget
       saveLocationToWidget(loc.latitude, loc.longitude, loc.city);
 
@@ -153,8 +181,17 @@ const Index = () => {
     }
   }, [generateImage]);
 
-  // Initial load based on geolocation
+  // Initial load - check localStorage first, then fallback to geolocation
   useEffect(() => {
+    // First, check for saved location in localStorage
+    const savedLoc = getSavedLocation();
+    if (savedLoc) {
+      console.log('[Init] Using saved location:', savedLoc.city);
+      loadWeatherAndImage(savedLoc);
+      return;
+    }
+
+    // No saved location, wait for geolocation
     if (geolocation.loading) return;
 
     if (geolocation.error || !geolocation.latitude || !geolocation.longitude) {

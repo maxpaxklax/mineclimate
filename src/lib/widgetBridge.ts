@@ -15,16 +15,21 @@ export const saveLocationToWidget = async (
   longitude: number,
   city: string
 ): Promise<void> => {
+  const platform = Capacitor.getPlatform();
+  console.log('[WidgetBridge] Platform:', platform);
+  console.log('[WidgetBridge] Attempting to save:', { latitude, longitude, city });
+
   // Only run on native Android
-  if (Capacitor.getPlatform() !== 'android') {
+  if (platform !== 'android') {
     console.log('[WidgetBridge] Not on Android, skipping widget update');
     return;
   }
 
   try {
+    console.log('[WidgetBridge] Calling native saveLocation...');
     await WidgetBridge.saveLocation({ latitude, longitude, city });
-    console.log('[WidgetBridge] Location saved for widget:', city);
+    console.log('[WidgetBridge] SUCCESS - Location saved for widget:', city);
   } catch (error) {
-    console.error('[WidgetBridge] Failed to save location:', error);
+    console.error('[WidgetBridge] FAILED to save location:', error);
   }
 };
