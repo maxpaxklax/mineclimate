@@ -158,7 +158,10 @@ const Index = () => {
       saveLocation(loc);
       
       // Save location to Android widget
-      saveLocationToWidget(loc.latitude, loc.longitude, loc.city);
+      console.log('[Index] About to call saveLocationToWidget for:', loc.city);
+      saveLocationToWidget(loc.latitude, loc.longitude, loc.city)
+        .then(() => console.log('[Index] Widget bridge call completed'))
+        .catch((err) => console.error('[Index] Widget bridge call failed:', err));
 
       // Check cache
       const cached = await getCachedImage(loc.city);
