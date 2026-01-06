@@ -13,6 +13,7 @@ import {
   isCacheValid,
   clearCache 
 } from '@/lib/imageCache';
+import { saveLocationToWidget } from '@/lib/widgetBridge';
 import { CityImage } from '@/components/CityImage';
 import { WeatherCard } from '@/components/WeatherCard';
 import { SearchBar } from '@/components/SearchBar';
@@ -127,6 +128,9 @@ const Index = () => {
       const weatherData = await fetchWeather(loc.latitude, loc.longitude);
       setWeather(weatherData);
       setLocation(loc);
+      
+      // Save location to Android widget
+      saveLocationToWidget(loc.latitude, loc.longitude, loc.city);
 
       // Check cache
       const cached = await getCachedImage(loc.city);
