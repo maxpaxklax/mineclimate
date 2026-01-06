@@ -72,9 +72,13 @@ class WeatherWidgetProvider : AppWidgetProvider() {
             val temp = prefs.getInt(PREF_LAST_TEMP, 0)
             val condition = prefs.getString(PREF_LAST_CONDITION, "cloudy") ?: "cloudy"
             val imageUrl = prefs.getString(PREF_LAST_IMAGE_URL, null)
+            val lat = prefs.getFloat(PREF_LAT, 0f)
+            val lon = prefs.getFloat(PREF_LON, 0f)
+
+            android.util.Log.d("WeatherWidget", "Cached data - city: $city, lat: $lat, lon: $lon, temp: $temp")
 
             views.setTextViewText(R.id.widget_city_name, city)
-            views.setTextViewText(R.id.widget_temperature, "${temp}°C")
+            views.setTextViewText(R.id.widget_temperature, if (lat != 0f) "${temp}°C" else "Open app")
             views.setImageViewResource(R.id.widget_weather_icon, getWeatherIcon(condition))
 
             // Update widget with cached data immediately
@@ -83,14 +87,17 @@ class WeatherWidgetProvider : AppWidgetProvider() {
             // Fetch fresh data in background
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-                    val lat = prefs.getFloat(PREF_LAT, 0f)
-                    val lon = prefs.getFloat(PREF_LON, 0f)
                     val savedCity = prefs.getString(PREF_CITY, null)
+                    android.util.Log.d("WeatherWidget", "Checking: lat=$lat, lon=$lon, city=$savedCity")
 
-                    if (lat != 0f && lon != 0f && savedCity != null) {
+                    if (lat != 0f && lon != 0f && savedCity != null && savedCity != "Loading...") {
+                        android.util.Log.d("WeatherWidget", "Fetching fresh data for $savedCity")
                         fetchAndUpdateWidget(context, appWidgetManager, appWidgetId, lat, lon, savedCity)
+                    } else {
+                        android.util.Log.d("WeatherWidget", "No location saved, showing 'Open app' message")
                     }
                 } catch (e: Exception) {
+                    android.util.Log.e("WeatherWidget", "Error updating widget", e)
                     e.printStackTrace()
                 }
             }
