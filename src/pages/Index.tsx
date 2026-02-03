@@ -78,14 +78,24 @@ const Index = () => {
       const startTime = Date.now();
       
       // Use direct fetch instead of supabase.functions.invoke for proper timeout support
-      const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-city-image`;
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      
+      console.log('[Image Generation] VITE_SUPABASE_URL:', supabaseUrl ? 'SET' : 'MISSING');
+      console.log('[Image Generation] VITE_SUPABASE_PUBLISHABLE_KEY:', supabaseKey ? 'SET' : 'MISSING');
+      
+      if (!supabaseUrl || !supabaseKey) {
+        throw new Error(`Environment variables missing: URL=${!!supabaseUrl}, KEY=${!!supabaseKey}`);
+      }
+      
+      const functionUrl = `${supabaseUrl}/functions/v1/generate-city-image`;
       console.log('[Image Generation] Calling:', functionUrl);
       
       const response = await fetch(functionUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          'Authorization': `Bearer ${supabaseKey}`,
         },
         body: JSON.stringify({
           city: loc.city,
