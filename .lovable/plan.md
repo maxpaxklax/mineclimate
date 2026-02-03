@@ -1,81 +1,48 @@
 
 
-## Fix Android Widget Bridge Issue
+## Fix "Failed to Create City Image" Issue
 
-### Current Situation
-You've been working on getting the **Android home screen widget** to display weather data from your MineClimate app. The widget should:
-- Show the current city name, temperature, and weather icon
-- Display an AI-generated city image
-- Update automatically every hour
+### Problem Identified
+The image generation occasionally fails. After investigation:
+- The edge function itself is working (I tested it and successfully generated a Berlin image)
+- The configuration is correct and the LOVABLE_API_KEY is set
 
-**The Problem**: The web app can't communicate with the native Android widget because:
-1. The `capacitor.config.ts` is currently set to load from a remote URL (Lovable preview), which requires authentication and breaks the native plugin bridge
-2. When using live reload, the app showed a Lovable login page instead of your weather app
+### Root Cause
+The code is using an older model name `google/gemini-2.5-flash-image-preview` which may have intermittent issues. The current recommended model is `google/gemini-2.5-flash-image`.
 
 ### The Fix
 
-#### Step 1: Remove Live Reload Configuration
-I'll update `capacitor.config.ts` to use local assets instead of the remote URL:
+#### Update the AI Model Name
+Change the model from the preview version to the stable version in the edge function:
 
 ```text
 Before:
-┌─────────────────────────────────────┐
-│ capacitor.config.ts                 │
-│ ─────────────────────               │
-│ webDir: 'dist'                      │
-│ server: {                           │
-│   url: 'https://...lovable...'  ← Problem │
-│   cleartext: true                   │
-│ }                                   │
-└─────────────────────────────────────┘
+model: 'google/gemini-2.5-flash-image-preview'
 
 After:
-┌─────────────────────────────────────┐
-│ capacitor.config.ts                 │
-│ ─────────────────────               │
-│ webDir: 'dist'                      │
-│ (no server block)                   │
-└─────────────────────────────────────┘
+model: 'google/gemini-2.5-flash-image'
 ```
 
-#### Step 2: You'll Need to Rebuild Locally
-After I make this change, you'll need to:
-1. Pull the latest code to your local machine
-2. Run: `npm run build`
-3. Run: `npx cap sync android`
-4. In Android Studio: Build → Clean Project, then Build → Rebuild Project
-5. Run the app on your device/emulator
-
-### What This Fixes
-- The app will load from local files (the `dist` folder) instead of a remote URL
-- The Capacitor bridge will work properly between JavaScript and native Android
-- The `WidgetBridgePlugin` will receive location data when you select a city
-- The home screen widget will update with the correct weather data
+This one-line change in `supabase/functions/generate-city-image/index.ts` should improve reliability.
 
 ### Technical Details
 
-**Files involved:**
-- `capacitor.config.ts` - Remove the server block (1 file change)
-- `android/app/src/main/java/.../MainActivity.kt` - Already has plugin registration (no change needed)
-- `android/app/src/main/java/.../WidgetBridgePlugin.kt` - Already configured (no change needed)
-- `src/lib/widgetBridge.ts` - Already has the bridge code (no change needed)
+**File to modify:**
+- `supabase/functions/generate-city-image/index.ts` (line 138)
 
-**Data flow after the fix:**
-```text
-User selects city in app
-        ↓
-Index.tsx calls saveLocationToWidget()
-        ↓
-widgetBridge.ts detects Android platform
-        ↓
-Calls native WidgetBridgePlugin.saveLocation()
-        ↓
-Plugin saves lat/lon/city to SharedPreferences
-        ↓
-Broadcasts widget update intent
-        ↓
-WeatherWidgetProvider fetches fresh data
-        ↓
-Widget displays updated weather
-```
+**What this fixes:**
+- Uses the stable, recommended image generation model
+- Should reduce intermittent "No image generated" errors
+- Better reliability for image generation across all cities
+
+### Testing After the Fix
+After I make this change:
+1. In the Lovable preview, search for a new city you haven't viewed before
+2. The app should generate a fresh image (may take 10-20 seconds)
+3. You should see the AI-generated city image appear
+
+For Android testing:
+1. Pull the latest code and rebuild (`npm run build && npx cap sync android`)
+2. Run the app and select a new city
+3. Verify the image generates correctly
 
