@@ -5,12 +5,13 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.widget.RemoteViews
 import androidx.work.*
 import coil.ImageLoader
 import coil.request.ImageRequest
 import coil.request.SuccessResult
+import coil.size.Size
 import kotlinx.coroutines.*
 import org.json.JSONObject
 import java.net.URL
@@ -26,7 +27,7 @@ class WeatherWidgetProvider : AppWidgetProvider() {
         for (appWidgetId in appWidgetIds) {
             updateWidget(context, appWidgetManager, appWidgetId)
         }
-        
+
         // Schedule hourly updates
         scheduleWidgetUpdates(context)
     }
@@ -57,7 +58,7 @@ class WeatherWidgetProvider : AppWidgetProvider() {
             appWidgetId: Int
         ) {
             val views = RemoteViews(context.packageName, R.layout.weather_widget)
-            
+
             // Set click intent to open app
             val intent = Intent(context, MainActivity::class.java)
             val pendingIntent = PendingIntent.getActivity(
@@ -71,7 +72,6 @@ class WeatherWidgetProvider : AppWidgetProvider() {
             val city = prefs.getString(PREF_CITY, "Loading...") ?: "Loading..."
             val temp = prefs.getInt(PREF_LAST_TEMP, 0)
             val condition = prefs.getString(PREF_LAST_CONDITION, "cloudy") ?: "cloudy"
-            val imageUrl = prefs.getString(PREF_LAST_IMAGE_URL, null)
             val lat = prefs.getFloat(PREF_LAT, 0f)
             val lon = prefs.getFloat(PREF_LON, 0f)
 
@@ -137,15 +137,24 @@ class WeatherWidgetProvider : AppWidgetProvider() {
 
                 // Load image if available
                 if (imageUrl != null) {
-                    val imageLoader = ImageLoader(context)
-                    val request = ImageRequest.Builder(context)
-                        .data(imageUrl)
-                        .build()
-                    
-                    val result = imageLoader.execute(request)
-                    if (result is SuccessResult) {
-                        val bitmap = (result.drawable as android.graphics.drawable.BitmapDrawable).bitmap
-                        views.setImageViewBitmap(R.id.widget_city_image, bitmap)
+                    try {
+                        val imageLoader = ImageLoader(context)
+                        val request = ImageRequest.Builder(context)
+                            .data(imageUrl)
+                            .size(800, 400)       // Scale down to stay under RemoteViews' ~1MB bitmap limit
+                            .allowHardware(false) // Must be false so the bitmap can be extracted and passed to RemoteViews
+                            .build()
+
+                        val result = imageLoader.execute(request)
+                        if (result is SuccessResult) {
+                            val bitmap = (result.drawable as BitmapDrawable).bitmap
+                            views.setImageViewBitmap(R.id.widget_city_image, bitmap)
+                            android.util.Log.d("WeatherWidget", "Image loaded successfully: ${bitmap.width}x${bitmap.height}")
+                        } else {
+                            android.util.Log.e("WeatherWidget", "Image load did not succeed: $result")
+                        }
+                    } catch (e: Exception) {
+                        android.util.Log.e("WeatherWidget", "Image loading exception", e)
                     }
                 }
 
@@ -162,6 +171,7 @@ class WeatherWidgetProvider : AppWidgetProvider() {
                 }
 
             } catch (e: Exception) {
+                android.util.Log.e("WeatherWidget", "fetchAndUpdateWidget exception", e)
                 e.printStackTrace()
             }
         }
