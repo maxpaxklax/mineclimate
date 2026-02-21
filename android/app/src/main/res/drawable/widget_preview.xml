@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="250dp"
+    android:height="180dp"
+    android:viewportWidth="250"
+    android:viewportHeight="180">
+    
+    <!-- Background -->
+    <path
+        android:fillColor="#E3F2FD"
+        android:pathData="M0,0h250v180h-250z"/>
+    
+    <!-- Border -->
+    <path
+        android:strokeColor="#90CAF9"
+        android:strokeWidth="2"
+        android:pathData="M2,2h246v176h-246z"
+        android:fillColor="@android:color/transparent"/>
+    
+    <!-- Weather icon placeholder -->
+    <path
+        android:fillColor="#64B5F6"
+        android:pathData="M125,60m-20,0a20,20 0,1,1 40,0a20,20 0,1,1 -40,0"/>
+    
+    <!-- Text lines -->
+    <path
+        android:fillColor="#42A5F5"
+        android:pathData="M85,100h80v10h-80z"/>
+    <path
+        android:fillColor="#42A5F5"
+        android:pathData="M95,120h60v8h-60z"/>
+</vector>

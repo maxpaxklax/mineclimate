@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">mineclimate</string>
+    <string name="title_activity_main">mineclimate</string>
+    <string name="package_name">app.lovable.mineclimate</string>
+    <string name="custom_url_scheme">app.lovable.mineclimate</string>
+<string name="widget_description">Shows current weather for your selected city</string>
+</resources>
