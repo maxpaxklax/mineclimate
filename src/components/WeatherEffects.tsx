@@ -46,22 +46,32 @@ function BirdSVG({ className, style, flapDuration }: { className?: string; style
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      {/* Left wing */}
       <path 
         d="M12 7 Q8 3 2 5"
         className="origin-[12px_7px]"
-        style={{ 
-          animation: `wing-flap-left ${flapDuration}s ease-in-out infinite`,
-        }}
+        style={{ animation: `wing-flap-left ${flapDuration}s ease-in-out infinite` }}
       />
-      {/* Right wing */}
       <path 
         d="M12 7 Q16 3 22 5"
         className="origin-[12px_7px]"
-        style={{ 
-          animation: `wing-flap-right ${flapDuration}s ease-in-out infinite`,
-        }}
+        style={{ animation: `wing-flap-right ${flapDuration}s ease-in-out infinite` }}
       />
+    </svg>
+  );
+}
+
+function AirplaneSVG({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <svg
+      viewBox="0 0 32 12"
+      className={className}
+      style={style}
+      fill="currentColor"
+    >
+      <path d="M2 6 Q0 6 2 5 L24 4 Q28 3 30 6 Q28 9 24 8 L2 7 Q0 6 2 6Z" />
+      <path d="M10 4 L14 0 L18 0 L15 4Z" />
+      <path d="M3 5 L1 1 L6 1 L5 4Z" />
+      <path d="M10 8 L14 12 L18 12 L15 8Z" />
     </svg>
   );
 }
@@ -70,6 +80,14 @@ export function WeatherEffects({ condition, isVisible, imageBounds }: WeatherEff
   const rainDrops = useMemo(() => generateParticles(30, 42), []);
   const snowflakes = useMemo(() => generateParticles(25, 73), []);
   const birds = useMemo(() => generateBirds(3, 89), []);
+  const airplane = useMemo(() => {
+    const seed = 157;
+    const pseudoRandom = ((seed) * 9301 + 49297) % 233280;
+    const top = 5 + ((pseudoRandom * 5) % 233280) / 233280 * 10;
+    const delay = 25 + ((pseudoRandom * 11) % 233280) / 233280 * 15;
+    const duration = 12 + ((pseudoRandom * 7) % 233280) / 233280 * 3;
+    return { top, delay, duration };
+  }, []);
 
   if (!isVisible) return null;
 
@@ -104,6 +122,17 @@ export function WeatherEffects({ condition, isVisible, imageBounds }: WeatherEff
               />
             </div>
           ))}
+          {/* Airplane - flies occasionally, higher and faster than birds */}
+          <div
+            className="absolute animate-plane-fly text-foreground/50"
+            style={{
+              top: `${airplane.top}%`,
+              animationDelay: `${airplane.delay}s`,
+              animationDuration: `${airplane.duration}s`,
+            }}
+          >
+            <AirplaneSVG className="w-10 md:w-14" />
+          </div>
         </div>
       )}
 
