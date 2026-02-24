@@ -1,48 +1,35 @@
 
 
-## Fix "Failed to Create City Image" Issue
+## Add Airplane Animation to Weather Effects
 
-### Problem Identified
-The image generation occasionally fails. After investigation:
-- The edge function itself is working (I tested it and successfully generated a Berlin image)
-- The configuration is correct and the LOVABLE_API_KEY is set
+### What Changes
+Add an occasional airplane flying across the sky alongside the existing birds during sunny and overcast conditions. The airplane will appear roughly every 4th animation cycle, fly in a straight line (no flapping), move faster, and sit higher than the birds.
 
-### Root Cause
-The code is using an older model name `google/gemini-2.5-flash-image-preview` which may have intermittent issues. The current recommended model is `google/gemini-2.5-flash-image`.
+### Changes
 
-### The Fix
+**1. `src/components/WeatherEffects.tsx`**
+- Add an `AirplaneSVG` component - a side-profile airplane silhouette (filled, not stroked like the birds)
+- Generate 1 airplane with a longer delay and faster speed using the existing `generateBirds`-style pseudo-random function
+- The airplane flies higher (top 5-15%) and faster (duration ~12-15s) than birds (top 10-40%, duration 20-35s)
+- Render the airplane inside the same image-bounds-constrained container as the birds
+- Airplane is slightly larger than birds (w-10 md:w-14) and uses the same `animate-bird-fly` CSS animation (straight line left-to-right)
+- No wing flapping -- just a static silhouette gliding across
 
-#### Update the AI Model Name
-Change the model from the preview version to the stable version in the edge function:
-
-```text
-Before:
-model: 'google/gemini-2.5-flash-image-preview'
-
-After:
-model: 'google/gemini-2.5-flash-image'
-```
-
-This one-line change in `supabase/functions/generate-city-image/index.ts` should improve reliability.
+**2. `src/index.css`**
+- Add a new `animate-plane-fly` keyframe that's similar to `bird-fly` but with a straighter path (less vertical movement) and a subtle slight bobbing effect
+- The plane starts off-screen left, flies to off-screen right at a consistent altitude
 
 ### Technical Details
 
-**File to modify:**
-- `supabase/functions/generate-city-image/index.ts` (line 138)
+The airplane SVG shape:
+```text
+Fuselage: elongated oval body
+Wings: swept-back triangular shapes (top and bottom)
+Tail fin: small triangle at the rear
+```
 
-**What this fixes:**
-- Uses the stable, recommended image generation model
-- Should reduce intermittent "No image generated" errors
-- Better reliability for image generation across all cities
-
-### Testing After the Fix
-After I make this change:
-1. In the Lovable preview, search for a new city you haven't viewed before
-2. The app should generate a fresh image (may take 10-20 seconds)
-3. You should see the AI-generated city image appear
-
-For Android testing:
-1. Pull the latest code and rebuild (`npm run build && npx cap sync android`)
-2. Run the app and select a new city
-3. Verify the image generates correctly
+Timing logic:
+- 1 airplane generated with a long initial delay (~25-40s) so it doesn't appear immediately
+- Animation duration ~12-15s (faster than birds at 20-35s)
+- The animation loops, so the plane reappears periodically after completing each pass
 
