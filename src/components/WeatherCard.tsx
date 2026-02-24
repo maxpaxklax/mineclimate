@@ -25,7 +25,7 @@ export function WeatherCard({ location, imageBounds }: WeatherCardProps) {
 
   return (
     <div 
-      className="absolute bottom-24 z-10 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2"
+      className="absolute bottom-28 z-10 left-4 right-4 md:bottom-24 md:left-1/2 md:right-auto md:-translate-x-1/2"
       style={imageBounds && !isMobile ? { 
         width: `${imageBounds.width - 32}px`,
         maxWidth: `${imageBounds.width - 32}px`,
