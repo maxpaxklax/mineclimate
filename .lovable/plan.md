@@ -1,41 +1,62 @@
 
 
-## Instant Widget Update After Image Generation
+## Match Generated Image Lighting to Time of Day
 
-### What It Does
-After the app generates and stores a new city image, it will immediately trigger a widget refresh so the home screen widget shows the new image right away -- instead of waiting up to 1 hour for the next scheduled update.
+### What Changes
+The generated city image will reflect the actual time of day at the city's location -- dawn, morning, midday, afternoon, golden hour, dusk, or nighttime -- with appropriate lighting, sky colors, and atmosphere.
 
-### How It Works Today
-1. User selects a city -> app generates an image -> stores it in cloud storage
-2. The `WidgetBridge` plugin sends only **location data** (lat, lon, city) to the native side
-3. The widget refreshes on its own schedule (hourly) and fetches the latest image from storage
+### How It Works
 
-### Changes
+**1. Client sends local hour to the edge function**
 
-**1. `src/pages/Index.tsx`**
-- After a new image is successfully generated (line ~133, after `setImageUrl(data.imageUrl)`), call `saveLocationToWidget()` again to trigger a native widget refresh
-- This reuses the existing bridge -- no new plugin method needed
-- The native side already fetches the latest image from storage on each update, so triggering a refresh is enough
+In `src/pages/Index.tsx`, pass the current hour (0-23) alongside the existing `city`, `condition`, and `temperature` fields when calling the image generation function. We use the user's device clock as a reasonable proxy for local time (most users search for cities in their timezone or nearby).
 
-**2. `src/lib/widgetBridge.ts`** (optional improvement)
-- No changes strictly required -- the existing `saveLocation` call triggers `ACTION_APPWIDGET_UPDATE` which calls `fetchAndUpdateWidget`, which already fetches the latest image from storage
+**2. Edge function maps the hour to a lighting description**
 
-### Why This Works Without Native Changes
-The native `WidgetBridgePlugin.saveLocation()` already:
-1. Saves lat/lon/city to SharedPreferences
-2. Sends an `ACTION_APPWIDGET_UPDATE` broadcast
-3. The widget provider's `onUpdate` calls `fetchAndUpdateWidget` which hits the `widget-data` edge function
-4. That function looks up the latest image in storage -- which will now be the freshly generated one
-
-So simply calling `saveLocationToWidget()` again after image generation is all that's needed.
-
-### Technical Detail
-In `Index.tsx`, inside the `generateImage` callback, after the image URL is set and cached (~line 142), add:
+In `supabase/functions/generate-city-image/index.ts`:
+- Accept a new `hour` field (0-23) in the request body
+- Map it to a time-of-day period and lighting description:
 
 ```text
-// After setCachedImage succeeds:
-saveLocationToWidget(loc.latitude, loc.longitude, loc.city)
+  5-7   -> dawn: soft pink-orange sunrise glow on the horizon, long shadows, sky transitioning from deep blue to warm pastels
+  7-10  -> morning: fresh warm morning light, low-angle golden sun, gentle shadows, crisp clear atmosphere
+  10-16 -> midday: bright overhead sunlight, short shadows, vivid saturated colors (current default for sunny)
+  16-18 -> golden hour: warm golden-hour light, long dramatic shadows, rich amber and orange tones, sun low on horizon
+  18-20 -> dusk: twilight sky with deep purple and orange gradients, city lights beginning to glow, fading daylight
+  20-5  -> night: dark night sky with stars/moon, city illuminated by warm streetlights and glowing windows, cool blue shadows
 ```
 
-This is a single-line addition that reuses all existing infrastructure.
+- Inject this lighting description into the prompt alongside the weather description
+- For night + rainy/snowy, combine both atmospheres (e.g., "rainy night with neon reflections on wet streets")
+
+**3. Update caching to account for time period**
+
+In `src/lib/imageCache.ts`:
+- The `isCacheValid` function already invalidates after 3 hours, which roughly aligns with time-of-day period changes
+- No cache schema changes needed -- the 3-hour expiry naturally triggers regeneration as lighting changes
+
+**4. Update storage path to include time period**
+
+In the edge function, the storage path hash (`stableKey`) will include the time period so that different times of day produce different cached files:
+```text
+Current: `${citySlug}-${dateStr}-${condition}`
+New:     `${citySlug}-${dateStr}-${condition}-${timePeriod}`
+```
+
+### Files to Change
+
+| File | Change |
+|------|--------|
+| `supabase/functions/generate-city-image/index.ts` | Add `hour` to request body, map to lighting description, inject into prompt, update storage key |
+| `src/pages/Index.tsx` | Pass `hour: new Date().getHours()` in the generate-image request body |
+
+### Technical Details
+
+The prompt will change from:
+> "...showing bright sunny day with clear blue skies..."
+
+To something like:
+> "...showing bright sunny day with clear blue skies, during golden hour with warm golden light, long dramatic shadows, rich amber and orange tones, sun low on horizon..."
+
+This gives the AI model explicit lighting direction while keeping the weather atmosphere intact.
 
