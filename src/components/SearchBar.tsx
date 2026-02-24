@@ -189,17 +189,34 @@ export function SearchBar({ onSelectLocation, onRefresh, imageUrl, isLoading, ci
         toast.error('Failed to create image');
         return;
       }
-      
+
+      const fileName = `${city || 'weather-city'}.png`;
+
+      // On mobile / Capacitor WebView, the <a download> trick doesn't work.
+      // Use the Web Share API to let the user save to gallery / files.
+      if (navigator.share && /android|iphone|ipad|ipod/i.test(navigator.userAgent)) {
+        const file = new File([blob], fileName, { type: 'image/png' });
+        await navigator.share({
+          files: [file],
+          title: fileName,
+        });
+        toast.success('Image shared!');
+        return;
+      }
+
+      // Desktop fallback: normal download
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${city || 'weather-city'}.png`;
+      a.download = fileName;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       toast.success('Image downloaded!');
     } catch (e) {
+      // User cancelled share dialog is not an error
+      if (e instanceof Error && e.name === 'AbortError') return;
       toast.error('Failed to download image');
     }
   };
