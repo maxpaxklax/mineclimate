@@ -101,6 +101,7 @@ const Index = () => {
           city: loc.city,
           condition: w.condition,
           temperature: w.temperature,
+          hour: new Date().getHours(),
         }),
         signal: controller.signal,
       });

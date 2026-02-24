@@ -10,7 +10,28 @@ interface RequestBody {
   city: string;
   condition: 'sunny' | 'rainy' | 'snowy' | 'overcast';
   temperature: number;
+  hour?: number;
 }
+
+type TimePeriod = 'dawn' | 'morning' | 'midday' | 'golden_hour' | 'dusk' | 'night';
+
+function getTimePeriod(hour: number): TimePeriod {
+  if (hour >= 5 && hour < 7) return 'dawn';
+  if (hour >= 7 && hour < 10) return 'morning';
+  if (hour >= 10 && hour < 16) return 'midday';
+  if (hour >= 16 && hour < 18) return 'golden_hour';
+  if (hour >= 18 && hour < 20) return 'dusk';
+  return 'night';
+}
+
+const lightingDescriptions: Record<TimePeriod, string> = {
+  dawn: 'during dawn with soft pink-orange sunrise glow on the horizon, long shadows, sky transitioning from deep blue to warm pastels',
+  morning: 'during morning with fresh warm morning light, low-angle golden sun, gentle shadows, crisp clear atmosphere',
+  midday: 'during midday with bright overhead sunlight, short shadows, vivid saturated colors',
+  golden_hour: 'during golden hour with warm golden light, long dramatic shadows, rich amber and orange tones, sun low on horizon',
+  dusk: 'during dusk with twilight sky showing deep purple and orange gradients, city lights beginning to glow, fading daylight',
+  night: 'at night with dark sky with stars and moon, city illuminated by warm streetlights and glowing windows, cool blue shadows, neon reflections',
+};
 
 // Cities with metro/subway systems (normalized to lowercase for matching)
 const citiesWithSubway = new Set([
@@ -82,7 +103,7 @@ serve(async (req) => {
   const startTime = Date.now();
 
   try {
-    const { city, condition, temperature } = await req.json() as RequestBody;
+    const { city, condition, temperature, hour } = await req.json() as RequestBody;
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -101,7 +122,9 @@ serve(async (req) => {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     const cityHasSubway = hasSubway(city);
-    console.log(`[generate-city-image] Starting for ${city} (subway: ${cityHasSubway}) with ${condition} weather at ${temperature}°`);
+    const timePeriod = getTimePeriod(hour ?? 12);
+    const lighting = lightingDescriptions[timePeriod];
+    console.log(`[generate-city-image] Starting for ${city} (subway: ${cityHasSubway}) with ${condition} weather at ${temperature}°, hour=${hour}, period=${timePeriod}`);
 
     // Build the prompt based on weather condition
     const weatherDescriptions = {
@@ -115,7 +138,7 @@ serve(async (req) => {
       ? 'underground subway/metro cross-section with train tunnels and detailed metro station with passengers'
       : 'underground cross-section showing natural brown earth layers, tree roots, utility pipes';
 
-    const prompt = `Create a highly detailed isometric 3D diorama illustration of ${city} showing ${weatherDescriptions[condition]}. Portrait format composition with three distinct layers: sky layer with weather effects, middle layer featuring recognizable ${city} architecture landmarks and city life with tiny people cars and trees, ${undergroundLayer}. Use soft, refined textures with realistic PBR materials and gentle, lifelike lighting and shadows. Integrate the current weather conditions directly into the city environment to create an immersive atmospheric mood. Use a clean, minimalistic composition with a soft, solid-colored background.`;
+    const prompt = `Create a highly detailed isometric 3D diorama illustration of ${city} showing ${weatherDescriptions[condition]}, ${lighting}. Portrait format composition with three distinct layers: sky layer with weather effects, middle layer featuring recognizable ${city} architecture landmarks and city life with tiny people cars and trees, ${undergroundLayer}. Use soft, refined textures with realistic PBR materials and gentle, lifelike lighting and shadows. Integrate the current weather conditions and time-of-day lighting directly into the city environment to create an immersive atmospheric mood. Use a clean, minimalistic composition with a soft, solid-colored background.`;
 
     console.log(`[generate-city-image] Calling AI gateway with prompt length: ${prompt.length}`);
 
@@ -206,7 +229,7 @@ serve(async (req) => {
     const now = new Date();
     const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
     const citySlug = slugify(city);
-    const stableKey = `${citySlug}-${dateStr}-${condition}`;
+    const stableKey = `${citySlug}-${dateStr}-${condition}-${timePeriod}`;
     const etag = await sha256(stableKey);
     const shortHash = etag.substring(0, 16);
     
