@@ -1,35 +1,41 @@
 
 
-## Add Airplane Animation to Weather Effects
+## Instant Widget Update After Image Generation
 
-### What Changes
-Add an occasional airplane flying across the sky alongside the existing birds during sunny and overcast conditions. The airplane will appear roughly every 4th animation cycle, fly in a straight line (no flapping), move faster, and sit higher than the birds.
+### What It Does
+After the app generates and stores a new city image, it will immediately trigger a widget refresh so the home screen widget shows the new image right away -- instead of waiting up to 1 hour for the next scheduled update.
+
+### How It Works Today
+1. User selects a city -> app generates an image -> stores it in cloud storage
+2. The `WidgetBridge` plugin sends only **location data** (lat, lon, city) to the native side
+3. The widget refreshes on its own schedule (hourly) and fetches the latest image from storage
 
 ### Changes
 
-**1. `src/components/WeatherEffects.tsx`**
-- Add an `AirplaneSVG` component - a side-profile airplane silhouette (filled, not stroked like the birds)
-- Generate 1 airplane with a longer delay and faster speed using the existing `generateBirds`-style pseudo-random function
-- The airplane flies higher (top 5-15%) and faster (duration ~12-15s) than birds (top 10-40%, duration 20-35s)
-- Render the airplane inside the same image-bounds-constrained container as the birds
-- Airplane is slightly larger than birds (w-10 md:w-14) and uses the same `animate-bird-fly` CSS animation (straight line left-to-right)
-- No wing flapping -- just a static silhouette gliding across
+**1. `src/pages/Index.tsx`**
+- After a new image is successfully generated (line ~133, after `setImageUrl(data.imageUrl)`), call `saveLocationToWidget()` again to trigger a native widget refresh
+- This reuses the existing bridge -- no new plugin method needed
+- The native side already fetches the latest image from storage on each update, so triggering a refresh is enough
 
-**2. `src/index.css`**
-- Add a new `animate-plane-fly` keyframe that's similar to `bird-fly` but with a straighter path (less vertical movement) and a subtle slight bobbing effect
-- The plane starts off-screen left, flies to off-screen right at a consistent altitude
+**2. `src/lib/widgetBridge.ts`** (optional improvement)
+- No changes strictly required -- the existing `saveLocation` call triggers `ACTION_APPWIDGET_UPDATE` which calls `fetchAndUpdateWidget`, which already fetches the latest image from storage
 
-### Technical Details
+### Why This Works Without Native Changes
+The native `WidgetBridgePlugin.saveLocation()` already:
+1. Saves lat/lon/city to SharedPreferences
+2. Sends an `ACTION_APPWIDGET_UPDATE` broadcast
+3. The widget provider's `onUpdate` calls `fetchAndUpdateWidget` which hits the `widget-data` edge function
+4. That function looks up the latest image in storage -- which will now be the freshly generated one
 
-The airplane SVG shape:
+So simply calling `saveLocationToWidget()` again after image generation is all that's needed.
+
+### Technical Detail
+In `Index.tsx`, inside the `generateImage` callback, after the image URL is set and cached (~line 142), add:
+
 ```text
-Fuselage: elongated oval body
-Wings: swept-back triangular shapes (top and bottom)
-Tail fin: small triangle at the rear
+// After setCachedImage succeeds:
+saveLocationToWidget(loc.latitude, loc.longitude, loc.city)
 ```
 
-Timing logic:
-- 1 airplane generated with a long initial delay (~25-40s) so it doesn't appear immediately
-- Animation duration ~12-15s (faster than birds at 20-35s)
-- The animation loops, so the plane reappears periodically after completing each pass
+This is a single-line addition that reuses all existing infrastructure.
 
