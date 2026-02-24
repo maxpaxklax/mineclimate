@@ -141,6 +141,11 @@ const Index = () => {
         generatedAt: data.generatedAt,
       });
       console.log('[Image Generation] Image cached successfully');
+      
+      // Trigger immediate widget refresh with the new image
+      saveLocationToWidget(loc.latitude, loc.longitude, loc.city)
+        .then(() => console.log('[Image Generation] Widget refresh triggered'))
+        .catch((err) => console.error('[Image Generation] Widget refresh failed:', err));
     } catch (e) {
       clearTimeout(timeoutId);
       
