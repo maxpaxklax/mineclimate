@@ -348,7 +348,7 @@ const Index = () => {
       
       {/* Saved city label when viewing a bookmark */}
       {!isOnCurrentCity && activeSlide && (
-        <div className="absolute bottom-28 left-0 right-0 z-20 flex justify-center pointer-events-none">
+        <div className="absolute bottom-28 md:bottom-32 left-0 right-0 z-20 flex justify-center pointer-events-none">
           <div className="bg-background/80 backdrop-blur-sm rounded-full px-4 py-1.5 text-xs text-muted-foreground flex items-center gap-1.5">
             <span>⭐</span>
             <span>Saved · {new Date(savedCities[carousel.currentIndex - 1]?.savedAt).toLocaleDateString()}</span>
