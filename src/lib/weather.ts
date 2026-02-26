@@ -8,12 +8,21 @@ export interface WeatherData {
   icon: string;
 }
 
+export interface HourlySlot {
+  time: Date;
+  temperature: number;
+  condition: WeatherCondition;
+  icon: string;
+  precipitationProbability: number;
+}
+
 export interface ForecastDay {
   date: Date;
   tempHigh: number;
   tempLow: number;
   condition: WeatherCondition;
   icon: string;
+  hourly: HourlySlot[];
 }
 
 export interface LocationData {
@@ -104,7 +113,7 @@ export async function fetchWeather(latitude: number, longitude: number): Promise
 }
 
 export async function fetchForecast(latitude: number, longitude: number): Promise<ForecastDay[]> {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto&forecast_days=7`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,weather_code&hourly=temperature_2m,weather_code,precipitation_probability&timezone=auto&forecast_days=7`;
   
   const response = await fetch(url);
   if (!response.ok) {
@@ -112,6 +121,27 @@ export async function fetchForecast(latitude: number, longitude: number): Promis
   }
   
   const data = await response.json();
+
+  // Group hourly data by date (every 2 hours)
+  const hourlyByDate: Record<string, HourlySlot[]> = {};
+  if (data.hourly) {
+    data.hourly.time.forEach((timeStr: string, i: number) => {
+      const dt = new Date(timeStr);
+      const hour = dt.getHours();
+      // Only keep every 2 hours
+      if (hour % 2 !== 0) return;
+      const dateKey = timeStr.substring(0, 10);
+      if (!hourlyByDate[dateKey]) hourlyByDate[dateKey] = [];
+      const { condition } = mapWMOCodeToCondition(data.hourly.weather_code[i]);
+      hourlyByDate[dateKey].push({
+        time: dt,
+        temperature: Math.round(data.hourly.temperature_2m[i]),
+        condition,
+        icon: getWeatherIcon(condition),
+        precipitationProbability: data.hourly.precipitation_probability?.[i] ?? 0,
+      });
+    });
+  }
   
   return data.daily.time.map((dateStr: string, i: number) => {
     const { condition } = mapWMOCodeToCondition(data.daily.weather_code[i]);
@@ -121,6 +151,7 @@ export async function fetchForecast(latitude: number, longitude: number): Promis
       tempLow: Math.round(data.daily.temperature_2m_min[i]),
       condition,
       icon: getWeatherIcon(condition),
+      hourly: hourlyByDate[dateStr] || [],
     };
   });
 }
