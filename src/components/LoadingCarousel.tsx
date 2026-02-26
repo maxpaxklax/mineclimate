@@ -51,7 +51,7 @@ export function LoadingCarousel() {
   const stackIndices = getStackOrder();
 
   return (
-    <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden">
+    <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden pb-24 md:pb-32">
       <div className="relative h-[25vh] w-[25vh] max-h-[200px] max-w-[200px] min-h-[140px] min-w-[140px]">
         {stackIndices.map((imgIndex, stackPosition) => {
           const isTop = stackPosition === 2;
