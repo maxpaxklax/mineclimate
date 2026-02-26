@@ -126,19 +126,19 @@ serve(async (req) => {
     const lighting = lightingDescriptions[timePeriod];
     console.log(`[generate-city-image] Starting for ${city} (subway: ${cityHasSubway}) with ${condition} weather at ${temperature}°, hour=${hour}, period=${timePeriod}`);
 
-    // Build the prompt based on weather condition
+    // Build the prompt based on weather condition - descriptions are time-neutral to avoid conflicting with lighting
     const weatherDescriptions = {
-      sunny: 'bright sunny day with clear blue skies, warm golden sunlight, vibrant saturated colors, cheerful atmosphere',
-      rainy: 'rainy day with dramatic clouds, rain drops falling, wet reflective streets, puddles, umbrellas, rich deep colors',
-      snowy: 'magical snowy winter day with snow-covered rooftops, falling snowflakes, cozy warm glowing lights in windows, pristine white snow',
-      overcast: 'cloudy overcast day with soft diffused light, grey clouds, subtle muted tones, calm peaceful atmosphere',
+      sunny: 'clear skies, vibrant saturated colors, cheerful atmosphere',
+      rainy: 'dramatic clouds, rain drops falling, wet reflective streets, puddles, umbrellas, rich deep colors',
+      snowy: 'snow-covered rooftops, falling snowflakes, cozy warm glowing lights in windows, pristine white snow',
+      overcast: 'cloudy overcast sky with soft diffused light, grey clouds, subtle muted tones, calm peaceful atmosphere',
     };
 
     const undergroundLayer = cityHasSubway
       ? 'underground subway/metro cross-section with train tunnels and detailed metro station with passengers'
       : 'underground cross-section showing natural brown earth layers, tree roots, utility pipes';
 
-    const prompt = `Create a highly detailed isometric 3D diorama illustration of ${city} showing ${weatherDescriptions[condition]}, ${lighting}. Portrait format composition with three distinct layers: sky layer with weather effects, middle layer featuring recognizable ${city} architecture landmarks and city life with tiny people cars and trees, ${undergroundLayer}. Use soft, refined textures with realistic PBR materials and gentle, lifelike lighting and shadows. Integrate the current weather conditions and time-of-day lighting directly into the city environment to create an immersive atmospheric mood. Use a clean, minimalistic composition with a soft, solid-colored background.`;
+    const prompt = `Create a highly detailed isometric 3D diorama illustration of ${city} ${lighting}, with ${weatherDescriptions[condition]}. Portrait format composition with three distinct layers: sky layer with weather effects, middle layer featuring recognizable ${city} architecture landmarks and city life with tiny people cars and trees, ${undergroundLayer}. Use soft, refined textures with realistic PBR materials and gentle, lifelike lighting and shadows. Integrate the weather conditions and time-of-day lighting uniformly across the entire scene — do NOT split the image into day and night halves. Use a clean, minimalistic composition with a soft, solid-colored background.`;
 
     console.log(`[generate-city-image] Calling AI gateway with prompt length: ${prompt.length}`);
 
