@@ -336,8 +336,8 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Carousel dots */}
-      {slides.length > 1 && (
+      {/* Carousel dots - only show when not on the first slide */}
+      {slides.length > 1 && carousel.currentIndex > 0 && (
         <CarouselDots total={slides.length} current={carousel.currentIndex} />
       )}
       
