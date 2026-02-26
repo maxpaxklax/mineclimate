@@ -192,19 +192,18 @@ export function SearchBar({ onSelectLocation, onRefresh, imageUrl, isLoading, ci
 
       const fileName = `${city || 'weather-city'}.png`;
 
-      // On mobile / Capacitor WebView, the <a download> trick doesn't work.
-      // Use the Web Share API to let the user save to gallery / files.
-      if (navigator.share && /android|iphone|ipad|ipod/i.test(navigator.userAgent)) {
+      // Prefer Web Share API — works reliably in WebViews & mobile browsers
+      if (navigator.share && navigator.canShare) {
         const file = new File([blob], fileName, { type: 'image/png' });
-        await navigator.share({
-          files: [file],
-          title: fileName,
-        });
-        toast.success('Image shared!');
-        return;
+        const shareData = { files: [file], title: fileName };
+        if (navigator.canShare(shareData)) {
+          await navigator.share(shareData);
+          toast.success('Image saved!');
+          return;
+        }
       }
 
-      // Desktop fallback: normal download
+      // Fallback: programmatic download (works on desktop, unreliable in WebViews)
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
