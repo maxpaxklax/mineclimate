@@ -294,7 +294,7 @@ const Index = () => {
     >
       {/* Bookmark star - top right */}
       {location && (
-        <div className="absolute top-4 right-4 z-30">
+        <div className="absolute top-8 right-4 z-30">
           {isOnCurrentCity ? (
             <BookmarkStar
               city={location.city}
