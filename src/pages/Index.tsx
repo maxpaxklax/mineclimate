@@ -285,7 +285,8 @@ const Index = () => {
 
   return (
     <div 
-      className="flex h-screen flex-col bg-background"
+      className="flex h-screen flex-col"
+      style={{ backgroundColor: '#1a1a1a' }}
       onTouchStart={carousel.handleTouchStart}
       onTouchMove={carousel.handleTouchMove}
       onTouchEnd={carousel.handleTouchEnd}

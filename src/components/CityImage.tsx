@@ -265,7 +265,7 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
   }, [imageUrl, calculateImageBounds]);
 
   return (
-    <div className="relative flex-1 overflow-hidden bg-gradient-to-br from-primary/20 to-secondary/30">
+    <div className="relative h-full overflow-hidden bg-gradient-to-br from-primary/20 to-secondary/30">
       {/* Top gradient overlay */}
       {edgeColors && (
         <div 
