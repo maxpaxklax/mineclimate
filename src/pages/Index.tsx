@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Star } from 'lucide-react';
 import { toast } from 'sonner';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useSwipeCarousel } from '@/hooks/useSwipeCarousel';
@@ -292,16 +293,26 @@ const Index = () => {
       onTouchEnd={carousel.handleTouchEnd}
     >
       {/* Bookmark star - top right */}
-      {isOnCurrentCity && location && (
+      {location && (
         <div className="absolute top-4 right-4 z-30">
-          <BookmarkStar
-            city={location.city}
-            location={location}
-            imageUrl={imageUrl}
-            temperature={weather?.temperature}
-            condition={weather?.condition}
-            onToggle={handleBookmarkToggle}
-          />
+          {isOnCurrentCity ? (
+            <BookmarkStar
+              city={location.city}
+              location={location}
+              imageUrl={imageUrl}
+              temperature={weather?.temperature}
+              condition={weather?.condition}
+              onToggle={handleBookmarkToggle}
+            />
+          ) : (
+            <div className="p-2">
+              <Star
+                className="h-7 w-7 fill-yellow-400 text-yellow-400 drop-shadow-lg"
+                strokeWidth={2}
+                style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.4))' }}
+              />
+            </div>
+          )}
         </div>
       )}
 
