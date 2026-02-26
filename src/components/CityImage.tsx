@@ -310,6 +310,7 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
           <img
             ref={imgRef}
             src={imageUrl}
+            crossOrigin="anonymous"
             alt={`Isometric city view of ${city}`}
             className={cn(
               "relative z-[5] h-full w-full object-contain transition-transform duration-100 pb-16 md:pb-28",
