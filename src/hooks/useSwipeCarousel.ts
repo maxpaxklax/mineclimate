@@ -43,13 +43,13 @@ export function useSwipeCarousel({ totalSlides, onSnapBack }: UseSwipeCarouselOp
 
     if (!isSwiping.current) return;
 
-    // Resist swiping at boundaries
+    // Resist swiping at boundaries (but less on last slide so snap-back triggers)
     let adjustedDelta = deltaX;
     if (currentIndex === 0 && deltaX > 0) {
       adjustedDelta = deltaX * 0.2; // resist swiping right on first slide
     }
     if (currentIndex === totalSlides - 1 && deltaX < 0) {
-      adjustedDelta = deltaX * 0.2; // resist swiping left on last slide
+      adjustedDelta = deltaX * 0.4; // resist but allow enough for snap-back trigger
     }
 
     setSwipeOffset(adjustedDelta);
@@ -75,7 +75,7 @@ export function useSwipeCarousel({ totalSlides, onSnapBack }: UseSwipeCarouselOp
       setSwipeOffset(0);
       setCurrentIndex(prev => prev - 1);
       setTimeout(() => setIsAnimating(false), 300);
-    } else if (swipeOffset < -threshold && currentIndex === totalSlides - 1 && totalSlides > 1) {
+    } else if (swipeOffset < -(threshold * 0.4) && currentIndex === totalSlides - 1 && totalSlides > 1) {
       // Past last slide → snap back to index 0
       setSnapBackActive(true);
       setIsAnimating(true);
