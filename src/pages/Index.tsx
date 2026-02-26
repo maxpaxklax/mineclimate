@@ -304,28 +304,35 @@ const Index = () => {
         </div>
       )}
 
-      {/* Swipe offset wrapper */}
-      <div
-        className="flex-1 relative overflow-hidden"
-        style={{
-          transform: `translateX(${carousel.swipeOffset}px)`,
-          transition: carousel.swipeOffset === 0
-            ? carousel.snapBackActive
-              ? 'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)'
-              : carousel.isAnimating
-                ? 'transform 0.3s ease-out'
-                : 'none'
-            : 'none',
-        }}
-      >
-        <CityImage 
-          imageUrl={displayImage} 
-          isGenerating={isOnCurrentCity ? (isGenerating || isLoading) : false} 
-          city={displayCity}
-          temperature={displayTemp}
-          condition={displayCondition}
-          onImageBoundsChange={setImageBounds}
-        />
+      {/* Horizontal slide strip */}
+      <div className="flex-1 relative overflow-hidden">
+        <div
+          className="flex h-full"
+          style={{
+            width: `${slides.length * 100}%`,
+            transform: `translateX(calc(-${carousel.currentIndex * (100 / slides.length)}% + ${carousel.swipeOffset}px))`,
+            transition: carousel.swipeOffset === 0
+              ? carousel.snapBackActive
+                ? 'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)'
+                : carousel.isAnimating
+                  ? 'transform 0.3s ease-out'
+                  : 'none'
+              : 'none',
+          }}
+        >
+          {slides.map((slide, i) => (
+            <div key={slide.location.city + i} className="h-full" style={{ width: `${100 / slides.length}%` }}>
+              <CityImage
+                imageUrl={slide.imageUrl}
+                isGenerating={i === 0 ? (isGenerating || isLoading) : false}
+                city={slide.location.city}
+                temperature={slide.temperature}
+                condition={slide.condition}
+                onImageBoundsChange={i === carousel.currentIndex ? setImageBounds : undefined}
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Carousel dots */}
