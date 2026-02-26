@@ -328,7 +328,7 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
           
           {/* Text overlay - positioned to overlap image on mobile */}
           <div 
-            className="absolute inset-x-0 top-[15%] md:top-8 z-20 flex flex-col items-center text-center pointer-events-none transition-opacity duration-200"
+            className="absolute inset-x-0 top-[8%] md:top-6 z-20 flex flex-col items-center text-center pointer-events-none transition-opacity duration-200"
             style={{ opacity: scale > 1.5 ? 0 : 1 }}
           >
             <h1 className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
