@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 import { useGeolocation } from '@/hooks/useGeolocation';
+import { useSwipeCarousel } from '@/hooks/useSwipeCarousel';
 import { 
   fetchWeather, 
   reverseGeocode, 
@@ -13,11 +14,14 @@ import {
   isCacheValid,
   clearCache 
 } from '@/lib/imageCache';
+import { getSavedCities, SavedCity } from '@/lib/savedCities';
 import { saveLocationToWidget } from '@/lib/widgetBridge';
 import { CityImage } from '@/components/CityImage';
 import { WeatherCard } from '@/components/WeatherCard';
 import { SearchBar } from '@/components/SearchBar';
 import { LocationPermission } from '@/components/LocationPermission';
+import { BookmarkStar } from '@/components/BookmarkStar';
+import { CarouselDots } from '@/components/CarouselDots';
 
 interface GeneratedImageResponse {
   imageUrl: string;
@@ -60,11 +64,51 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showPermission, setShowPermission] = useState(false);
   const [imageBounds, setImageBounds] = useState<{ left: number; width: number } | null>(null);
+  const [savedCities, setSavedCities] = useState<SavedCity[]>([]);
+
+  // Refresh saved cities list
+  const refreshSavedCities = useCallback(() => {
+    setSavedCities(getSavedCities());
+  }, []);
+
+  useEffect(() => {
+    refreshSavedCities();
+  }, [refreshSavedCities]);
+
+  // Build slides: [current, ...saved]
+  const slides = useMemo(() => {
+    const current = location ? {
+      location,
+      imageUrl,
+      temperature: weather?.temperature,
+      condition: weather?.condition,
+      isCurrent: true,
+    } : null;
+
+    const saved = savedCities.map(sc => ({
+      location: sc.location,
+      imageUrl: sc.imageUrl,
+      temperature: sc.temperature,
+      condition: sc.condition,
+      isCurrent: false,
+    }));
+
+    return current ? [current, ...saved] : [];
+  }, [location, imageUrl, weather, savedCities]);
+
+  const carousel = useSwipeCarousel({
+    totalSlides: slides.length,
+    onSnapBack: () => {
+      toast('Back to your current city!', { icon: '📍', duration: 1500 });
+    },
+  });
+
+  const activeSlide = slides[carousel.currentIndex];
 
   const generateImage = useCallback(async (loc: LocationData, w: WeatherData) => {
     setIsGenerating(true);
     
-    const timeoutMs = 60000; // 60 second timeout
+    const timeoutMs = 60000;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
       console.error('[Image Generation] Aborting due to timeout');
@@ -77,19 +121,14 @@ const Index = () => {
       
       const startTime = Date.now();
       
-      // Use direct fetch instead of supabase.functions.invoke for proper timeout support
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-      
-      console.log('[Image Generation] VITE_SUPABASE_URL:', supabaseUrl ? 'SET' : 'MISSING');
-      console.log('[Image Generation] VITE_SUPABASE_PUBLISHABLE_KEY:', supabaseKey ? 'SET' : 'MISSING');
       
       if (!supabaseUrl || !supabaseKey) {
         throw new Error(`Environment variables missing: URL=${!!supabaseUrl}, KEY=${!!supabaseKey}`);
       }
       
       const functionUrl = `${supabaseUrl}/functions/v1/generate-city-image`;
-      console.log('[Image Generation] Calling:', functionUrl);
       
       const response = await fetch(functionUrl, {
         method: 'POST',
@@ -113,27 +152,17 @@ const Index = () => {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('[Image Generation] HTTP error:', response.status, errorText);
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
 
       const data: GeneratedImageResponse = await response.json();
-      console.log('[Image Generation] Parsed response:', { 
-        city: data.city, 
-        etag: data.etag, 
-        generatedAt: data.generatedAt,
-        urlLength: data.imageUrl?.length 
-      });
 
       if (!data.imageUrl) {
-        console.warn('[Image Generation] No imageUrl in response:', data);
         throw new Error('No image URL returned from server');
       }
 
-      console.log('[Image Generation] Setting imageUrl (HTTPS):', data.imageUrl.substring(0, 80) + '...');
       setImageUrl(data.imageUrl);
       
-      // Cache the metadata (URL, etag, generatedAt)
       await setCachedImage({
         city: loc.city,
         condition: w.condition,
@@ -141,55 +170,40 @@ const Index = () => {
         etag: data.etag,
         generatedAt: data.generatedAt,
       });
-      console.log('[Image Generation] Image cached successfully');
       
-      // Trigger immediate widget refresh with the new image
       saveLocationToWidget(loc.latitude, loc.longitude, loc.city)
-        .then(() => console.log('[Image Generation] Widget refresh triggered'))
         .catch((err) => console.error('[Image Generation] Widget refresh failed:', err));
     } catch (e) {
       clearTimeout(timeoutId);
       
       if (e instanceof Error && e.name === 'AbortError') {
-        console.error('[Image Generation] Timeout after', timeoutMs, 'ms');
         toast.error('Image generation timed out. Please try again.');
       } else {
         console.error('[Image Generation] Failed:', e);
         toast.error('Failed to generate city image');
       }
     } finally {
-      console.log('[Image Generation] Completing, setting isGenerating to false');
       setIsGenerating(false);
     }
   }, []);
 
   const loadWeatherAndImage = useCallback(async (loc: LocationData) => {
     try {
-      // Fetch weather
       const weatherData = await fetchWeather(loc.latitude, loc.longitude);
       setWeather(weatherData);
       setLocation(loc);
       
-      // Save location to localStorage for persistence
       saveLocation(loc);
       
-      // Save location to Android widget
-      console.log('[Index] About to call saveLocationToWidget for:', loc.city);
       saveLocationToWidget(loc.latitude, loc.longitude, loc.city)
-        .then(() => console.log('[Index] Widget bridge call completed'))
         .catch((err) => console.error('[Index] Widget bridge call failed:', err));
 
-      // Check cache
       const cached = await getCachedImage(loc.city);
       
       if (cached && isCacheValid(cached, weatherData.condition)) {
-        // Use cached image URL
-        console.log('[Weather] Using cached image:', { city: loc.city, etag: cached.etag });
         setImageUrl(cached.imageUrl);
         setIsLoading(false);
       } else {
-        // Generate new image
-        console.log('[Weather] Cache miss, generating new image for:', loc.city);
         setIsLoading(false);
         await generateImage(loc, weatherData);
       }
@@ -200,17 +214,14 @@ const Index = () => {
     }
   }, [generateImage]);
 
-  // Initial load - check localStorage first, then fallback to geolocation
+  // Initial load
   useEffect(() => {
-    // First, check for saved location in localStorage
     const savedLoc = getSavedLocation();
     if (savedLoc) {
-      console.log('[Init] Using saved location:', savedLoc.city);
       loadWeatherAndImage(savedLoc);
       return;
     }
 
-    // No saved location, wait for geolocation
     if (geolocation.loading) return;
 
     if (geolocation.error || !geolocation.latitude || !geolocation.longitude) {
@@ -219,11 +230,8 @@ const Index = () => {
       return;
     }
 
-    // Get city name from coordinates
     reverseGeocode(geolocation.latitude, geolocation.longitude)
-      .then(loc => {
-        loadWeatherAndImage(loc);
-      })
+      .then(loc => loadWeatherAndImage(loc))
       .catch(e => {
         console.error('Reverse geocoding failed:', e);
         setShowPermission(true);
@@ -234,6 +242,8 @@ const Index = () => {
   const handleSelectLocation = useCallback(async (loc: LocationData) => {
     setIsLoading(true);
     setShowPermission(false);
+    // Reset to first slide when selecting new location
+    carousel.goTo(0);
     
     try {
       await loadWeatherAndImage(loc);
@@ -242,7 +252,7 @@ const Index = () => {
       toast.error('Failed to load weather for location');
       setIsLoading(false);
     }
-  }, [loadWeatherAndImage]);
+  }, [loadWeatherAndImage, carousel]);
 
   const handleRefresh = useCallback(async () => {
     if (!location || !weather) return;
@@ -250,6 +260,10 @@ const Index = () => {
     await clearCache();
     await generateImage(location, weather);
   }, [location, weather, generateImage]);
+
+  const handleBookmarkToggle = useCallback(() => {
+    refreshSavedCities();
+  }, [refreshSavedCities]);
 
   if (showPermission) {
     return (
@@ -261,29 +275,87 @@ const Index = () => {
     );
   }
 
+  // Determine what to display based on active slide
+  const displayCity = activeSlide?.location.city || location?.city || 'your city';
+  const displayTemp = activeSlide?.temperature ?? weather?.temperature;
+  const displayCondition = activeSlide?.condition ?? weather?.condition;
+  const displayImage = activeSlide?.imageUrl ?? imageUrl;
+  const displayLocation = activeSlide?.location ?? location;
+  const isOnCurrentCity = carousel.currentIndex === 0;
+
   return (
-    <div className="flex h-screen flex-col bg-background">
-      <CityImage 
-        imageUrl={imageUrl} 
-        isGenerating={isGenerating || isLoading} 
-        city={location?.city || 'your city'}
-        temperature={weather?.temperature}
-        condition={weather?.condition}
-        onImageBoundsChange={setImageBounds}
-      />
+    <div 
+      className="flex h-screen flex-col bg-background"
+      onTouchStart={carousel.handleTouchStart}
+      onTouchMove={carousel.handleTouchMove}
+      onTouchEnd={carousel.handleTouchEnd}
+    >
+      {/* Bookmark star - top right */}
+      {isOnCurrentCity && location && (
+        <div className="absolute top-4 right-4 z-30">
+          <BookmarkStar
+            city={location.city}
+            location={location}
+            imageUrl={imageUrl}
+            temperature={weather?.temperature}
+            condition={weather?.condition}
+            onToggle={handleBookmarkToggle}
+          />
+        </div>
+      )}
+
+      {/* Swipe offset wrapper */}
+      <div
+        className="flex-1 relative overflow-hidden"
+        style={{
+          transform: `translateX(${carousel.swipeOffset}px)`,
+          transition: carousel.swipeOffset === 0
+            ? carousel.snapBackActive
+              ? 'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)'
+              : carousel.isAnimating
+                ? 'transform 0.3s ease-out'
+                : 'none'
+            : 'none',
+        }}
+      >
+        <CityImage 
+          imageUrl={displayImage} 
+          isGenerating={isOnCurrentCity ? (isGenerating || isLoading) : false} 
+          city={displayCity}
+          temperature={displayTemp}
+          condition={displayCondition}
+          onImageBoundsChange={setImageBounds}
+        />
+      </div>
+
+      {/* Carousel dots */}
+      {slides.length > 1 && (
+        <CarouselDots total={slides.length} current={carousel.currentIndex} />
+      )}
       
-      {location && (
-        <WeatherCard location={location} imageBounds={imageBounds} />
+      {/* Weather card only on current city */}
+      {isOnCurrentCity && displayLocation && (
+        <WeatherCard location={displayLocation} imageBounds={imageBounds} />
+      )}
+      
+      {/* Saved city label when viewing a bookmark */}
+      {!isOnCurrentCity && activeSlide && (
+        <div className="absolute bottom-28 left-0 right-0 z-20 flex justify-center pointer-events-none">
+          <div className="bg-background/80 backdrop-blur-sm rounded-full px-4 py-1.5 text-xs text-muted-foreground flex items-center gap-1.5">
+            <span>⭐</span>
+            <span>Saved · {new Date(savedCities[carousel.currentIndex - 1]?.savedAt).toLocaleDateString()}</span>
+          </div>
+        </div>
       )}
       
       <SearchBar 
         onSelectLocation={handleSelectLocation}
         onRefresh={handleRefresh}
-        imageUrl={imageUrl}
-        isLoading={isGenerating || isLoading}
-        city={location?.city || 'your city'}
-        temperature={weather?.temperature}
-        condition={weather?.condition}
+        imageUrl={displayImage}
+        isLoading={isOnCurrentCity ? (isGenerating || isLoading) : false}
+        city={displayCity}
+        temperature={displayTemp}
+        condition={displayCondition}
         imageBounds={imageBounds}
       />
     </div>
