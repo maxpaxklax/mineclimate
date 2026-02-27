@@ -40,7 +40,7 @@ export function WeatherCard({ location, imageBounds }: WeatherCardProps) {
     >
       <div className="weather-card rounded-2xl p-3 backdrop-blur-xl">
         {/* Daily forecast strip */}
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide" onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
           {isLoading ? (
             Array.from({ length: 7 }).map((_, i) => (
               <div key={i} className="flex-shrink-0 w-14 h-20 bg-muted/30 rounded-xl animate-pulse" />
@@ -90,7 +90,7 @@ export function WeatherCard({ location, imageBounds }: WeatherCardProps) {
 
 function HourlyRow({ hourly }: { hourly: HourlySlot[] }) {
   return (
-    <div className="flex gap-1.5 overflow-x-auto scrollbar-hide rounded-xl bg-muted/10 p-2">
+    <div className="flex gap-1.5 overflow-x-auto scrollbar-hide rounded-xl bg-muted/10 p-2" onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
       {hourly.length === 0 ? (
         <span className="text-xs text-muted-foreground px-2 py-3">No hourly data</span>
       ) : (
