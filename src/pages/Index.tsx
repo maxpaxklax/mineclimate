@@ -3,6 +3,7 @@ import { Star } from 'lucide-react';
 import { toast } from 'sonner';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useSwipeCarousel } from '@/hooks/useSwipeCarousel';
+import { useWidgetImage } from '@/hooks/useWidgetImage';
 import { 
   fetchWeather, 
   reverseGeocode, 
@@ -58,6 +59,7 @@ const saveLocation = (loc: LocationData) => {
 
 const Index = () => {
   const geolocation = useGeolocation();
+  const { widgetImage, clearWidgetImage } = useWidgetImage();
   const [location, setLocation] = useState<LocationData | null>(null);
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -188,7 +190,7 @@ const Index = () => {
     }
   }, []);
 
-  const loadWeatherAndImage = useCallback(async (loc: LocationData) => {
+  const loadWeatherAndImage = useCallback(async (loc: LocationData, widgetImageUrl?: string) => {
     try {
       const weatherData = await fetchWeather(loc.latitude, loc.longitude);
       setWeather(weatherData);
@@ -198,6 +200,22 @@ const Index = () => {
       
       saveLocationToWidget(loc.latitude, loc.longitude, loc.city)
         .catch((err) => console.error('[Index] Widget bridge call failed:', err));
+
+      // If launched from widget with a specific image, use that directly
+      if (widgetImageUrl) {
+        console.log('[Index] Using widget image URL:', widgetImageUrl);
+        setImageUrl(widgetImageUrl);
+        setIsLoading(false);
+        // Also cache it so it persists
+        await setCachedImage({
+          city: loc.city,
+          condition: weatherData.condition,
+          imageUrl: widgetImageUrl,
+          etag: 'widget-' + Date.now(),
+          generatedAt: new Date().toISOString(),
+        });
+        return;
+      }
 
       const cached = await getCachedImage(loc.city);
       
@@ -217,9 +235,13 @@ const Index = () => {
 
   // Initial load
   useEffect(() => {
+    // If launched from widget with a specific image, use it
+    const widgetUrl = widgetImage?.imageUrl;
+    
     const savedLoc = getSavedLocation();
     if (savedLoc) {
-      loadWeatherAndImage(savedLoc);
+      loadWeatherAndImage(savedLoc, widgetUrl || undefined);
+      if (widgetUrl) clearWidgetImage();
       return;
     }
 
@@ -232,13 +254,16 @@ const Index = () => {
     }
 
     reverseGeocode(geolocation.latitude, geolocation.longitude)
-      .then(loc => loadWeatherAndImage(loc))
+      .then(loc => {
+        loadWeatherAndImage(loc, widgetUrl || undefined);
+        if (widgetUrl) clearWidgetImage();
+      })
       .catch(e => {
         console.error('Reverse geocoding failed:', e);
         setShowPermission(true);
         setIsLoading(false);
       });
-  }, [geolocation.loading, geolocation.latitude, geolocation.longitude, geolocation.error, loadWeatherAndImage]);
+  }, [geolocation.loading, geolocation.latitude, geolocation.longitude, geolocation.error, loadWeatherAndImage, widgetImage, clearWidgetImage]);
 
   const handleSelectLocation = useCallback(async (loc: LocationData) => {
     setIsLoading(true);
