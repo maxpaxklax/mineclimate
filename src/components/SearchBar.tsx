@@ -332,7 +332,7 @@ export function SearchBar({ onSelectLocation, onRefresh, imageUrl, isLoading, ci
                         className="h-10 w-10"
                         onClick={handleInstall}
                       >
-                        <Smartphone className="h-5 w-5" />
+                        <LayoutGrid className="h-5 w-5" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>Install App</TooltipContent>
