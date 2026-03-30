@@ -59,6 +59,7 @@ const saveLocation = (loc: LocationData) => {
 
 const Index = () => {
   const geolocation = useGeolocation();
+  const { widgetImage, clearWidgetImage } = useWidgetImage();
   const [location, setLocation] = useState<LocationData | null>(null);
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
