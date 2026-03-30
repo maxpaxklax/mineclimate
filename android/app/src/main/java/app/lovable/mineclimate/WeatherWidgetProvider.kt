@@ -144,10 +144,15 @@ class WeatherWidgetProvider : AppWidgetProvider() {
                     }
                 }
 
-                val intent = Intent(context, MainActivity::class.java)
+                val latestImageUrl = if (imageUrl != null) imageUrl else prefs.getString(PREF_LAST_IMAGE_URL, "") ?: ""
+                val intent = Intent(context, MainActivity::class.java).apply {
+                    putExtra("widget_image_url", latestImageUrl)
+                    putExtra("widget_city", city)
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                }
                 val pendingIntent = PendingIntent.getActivity(
-                    context, 0, intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    context, 1, intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
                 )
                 views.setOnClickPendingIntent(R.id.widget_container, pendingIntent)
 
