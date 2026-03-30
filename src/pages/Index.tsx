@@ -235,9 +235,13 @@ const Index = () => {
 
   // Initial load
   useEffect(() => {
+    // If launched from widget with a specific image, use it
+    const widgetUrl = widgetImage?.imageUrl;
+    
     const savedLoc = getSavedLocation();
     if (savedLoc) {
-      loadWeatherAndImage(savedLoc);
+      loadWeatherAndImage(savedLoc, widgetUrl || undefined);
+      if (widgetUrl) clearWidgetImage();
       return;
     }
 
@@ -250,13 +254,16 @@ const Index = () => {
     }
 
     reverseGeocode(geolocation.latitude, geolocation.longitude)
-      .then(loc => loadWeatherAndImage(loc))
+      .then(loc => {
+        loadWeatherAndImage(loc, widgetUrl || undefined);
+        if (widgetUrl) clearWidgetImage();
+      })
       .catch(e => {
         console.error('Reverse geocoding failed:', e);
         setShowPermission(true);
         setIsLoading(false);
       });
-  }, [geolocation.loading, geolocation.latitude, geolocation.longitude, geolocation.error, loadWeatherAndImage]);
+  }, [geolocation.loading, geolocation.latitude, geolocation.longitude, geolocation.error, loadWeatherAndImage, widgetImage, clearWidgetImage]);
 
   const handleSelectLocation = useCallback(async (loc: LocationData) => {
     setIsLoading(true);
