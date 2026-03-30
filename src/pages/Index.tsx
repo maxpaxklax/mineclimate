@@ -3,6 +3,7 @@ import { Star } from 'lucide-react';
 import { toast } from 'sonner';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useSwipeCarousel } from '@/hooks/useSwipeCarousel';
+import { useWidgetImage } from '@/hooks/useWidgetImage';
 import { 
   fetchWeather, 
   reverseGeocode, 
