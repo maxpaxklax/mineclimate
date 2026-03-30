@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Share2, Download, RefreshCw, Loader2, MapPin, Smartphone } from 'lucide-react';
+import { Search, Share2, Download, RefreshCw, Loader2, MapPin, LayoutGrid } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
