@@ -190,7 +190,7 @@ const Index = () => {
     }
   }, []);
 
-  const loadWeatherAndImage = useCallback(async (loc: LocationData) => {
+  const loadWeatherAndImage = useCallback(async (loc: LocationData, widgetImageUrl?: string) => {
     try {
       const weatherData = await fetchWeather(loc.latitude, loc.longitude);
       setWeather(weatherData);
@@ -200,6 +200,22 @@ const Index = () => {
       
       saveLocationToWidget(loc.latitude, loc.longitude, loc.city)
         .catch((err) => console.error('[Index] Widget bridge call failed:', err));
+
+      // If launched from widget with a specific image, use that directly
+      if (widgetImageUrl) {
+        console.log('[Index] Using widget image URL:', widgetImageUrl);
+        setImageUrl(widgetImageUrl);
+        setIsLoading(false);
+        // Also cache it so it persists
+        await setCachedImage({
+          city: loc.city,
+          condition: weatherData.condition,
+          imageUrl: widgetImageUrl,
+          etag: 'widget-' + Date.now(),
+          generatedAt: new Date().toISOString(),
+        });
+        return;
+      }
 
       const cached = await getCachedImage(loc.city);
       
