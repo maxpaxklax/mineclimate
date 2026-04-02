@@ -24,8 +24,9 @@ function persist(cities: SavedCity[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(cities));
 }
 
-export function isCitySaved(cityName: string): boolean {
-  return getSavedCities().some(c => c.location.city.toLowerCase() === cityName.toLowerCase());
+export function isImageSaved(imageUrl: string | null | undefined): boolean {
+  if (!imageUrl) return false;
+  return getSavedCities().some((city) => city.imageUrl === imageUrl);
 }
 
 export function saveCity(
@@ -36,11 +37,8 @@ export function saveCity(
 ): { success: boolean; reason?: string } {
   const cities = getSavedCities();
 
-  if (isCitySaved(location.city)) {
-    // Already saved — remove it (toggle off)
-    const filtered = cities.filter(
-      c => c.location.city.toLowerCase() !== location.city.toLowerCase(),
-    );
+  if (isImageSaved(imageUrl)) {
+    const filtered = cities.filter((city) => city.imageUrl !== imageUrl);
     persist(filtered);
     return { success: true, reason: 'removed' };
   }
