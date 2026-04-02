@@ -164,6 +164,7 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
       }
       setScale(newScale);
     } else if (e.touches.length === 1 && scale > 1 && lastTouch.current) {
+      e.stopPropagation();
       e.preventDefault();
       const deltaX = e.touches[0].clientX - lastTouch.current.x;
       const deltaY = e.touches[0].clientY - lastTouch.current.y;
