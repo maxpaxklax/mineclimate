@@ -131,6 +131,7 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (e.touches.length === 2 && initialDistance.current !== null && containerRef.current) {
+      e.stopPropagation();
       e.preventDefault();
       const currentDistance = getDistance(e.touches);
       const currentCenter = getCenter(e.touches);
