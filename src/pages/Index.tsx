@@ -287,8 +287,12 @@ const Index = () => {
     await generateImage(location, weather);
   }, [location, weather, generateImage]);
 
-  const handleBookmarkToggle = useCallback(() => {
+  const handleBookmarkToggle = useCallback((saved?: boolean) => {
     refreshSavedCities();
+
+    if (saved === false && carousel.currentIndex > 0) {
+      carousel.goTo(Math.max(0, carousel.currentIndex - 1));
+    }
   }, [refreshSavedCities]);
 
   if (showPermission) {
@@ -330,13 +334,14 @@ const Index = () => {
               onToggle={handleBookmarkToggle}
             />
           ) : (
-            <div className="p-2">
-              <Star
-                className="h-7 w-7 fill-yellow-400 text-yellow-400 drop-shadow-lg"
-                strokeWidth={2}
-                style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.4))' }}
-              />
-            </div>
+            <BookmarkStar
+              city={activeSlide?.location.city || ''}
+              location={activeSlide?.location || null}
+              imageUrl={activeSlide?.imageUrl || null}
+              temperature={activeSlide?.temperature}
+              condition={activeSlide?.condition}
+              onToggle={handleBookmarkToggle}
+            />
           )}
         </div>
       )}

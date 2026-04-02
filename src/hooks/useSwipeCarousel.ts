@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 
 interface UseSwipeCarouselOptions {
   totalSlides: number;
@@ -14,6 +14,16 @@ export function useSwipeCarousel({ totalSlides, onSnapBack }: UseSwipeCarouselOp
   const touchStartY = useRef(0);
   const isSwiping = useRef(false);
   const isVerticalScroll = useRef(false);
+
+  useEffect(() => {
+    if (totalSlides <= 0) {
+      setCurrentIndex(0);
+      setSwipeOffset(0);
+      return;
+    }
+
+    setCurrentIndex((prev) => Math.min(prev, totalSlides - 1));
+  }, [totalSlides]);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (isAnimating) return;
