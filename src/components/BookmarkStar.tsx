@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Star } from 'lucide-react';
-import { isCitySaved, saveCity } from '@/lib/savedCities';
+import { isImageSaved, saveCity } from '@/lib/savedCities';
 import { LocationData, WeatherCondition } from '@/lib/weather';
 import { toast } from 'sonner';
 
@@ -18,8 +18,8 @@ export function BookmarkStar({ city, location, imageUrl, temperature, condition,
   const [showBubble, setShowBubble] = useState(false);
 
   useEffect(() => {
-    setSaved(isCitySaved(city));
-  }, [city]);
+    setSaved(isImageSaved(imageUrl));
+  }, [imageUrl]);
 
   const handleTap = () => {
     if (!location || !imageUrl || temperature === undefined || !condition) return;
@@ -61,11 +61,9 @@ export function BookmarkStar({ city, location, imageUrl, temperature, condition,
         />
       </button>
 
-      {/* Speech bubble */}
       {showBubble && (
         <div className="absolute right-0 top-full mt-2 animate-fade-in z-30 pointer-events-none">
           <div className="relative bg-background/95 backdrop-blur-sm text-foreground text-xs rounded-xl px-3 py-2 shadow-lg whitespace-nowrap">
-            {/* Arrow */}
             <div className="absolute -top-1.5 right-4 w-3 h-3 rotate-45 bg-background/95" />
             Swipe left to visit your saved cities!
           </div>
