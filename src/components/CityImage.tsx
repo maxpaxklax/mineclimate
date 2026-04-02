@@ -115,11 +115,13 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (e.touches.length === 2) {
+      e.stopPropagation();
       initialDistance.current = getDistance(e.touches);
       initialScale.current = scale;
       initialTranslate.current = { ...translate };
       initialCenter.current = getCenter(e.touches);
     } else if (e.touches.length === 1 && scale > 1) {
+      e.stopPropagation();
       lastTouch.current = {
         x: e.touches[0].clientX,
         y: e.touches[0].clientY,
@@ -129,6 +131,7 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (e.touches.length === 2 && initialDistance.current !== null && containerRef.current) {
+      e.stopPropagation();
       e.preventDefault();
       const currentDistance = getDistance(e.touches);
       const currentCenter = getCenter(e.touches);
@@ -161,6 +164,7 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
       }
       setScale(newScale);
     } else if (e.touches.length === 1 && scale > 1 && lastTouch.current) {
+      e.stopPropagation();
       e.preventDefault();
       const deltaX = e.touches[0].clientX - lastTouch.current.x;
       const deltaY = e.touches[0].clientY - lastTouch.current.y;
