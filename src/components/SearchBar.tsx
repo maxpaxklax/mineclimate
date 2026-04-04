@@ -233,11 +233,12 @@ export function SearchBar({ onSelectLocation, onRefresh, imageUrl, isLoading, ci
       if (navigator.share) {
         const file = new File([blob], `${city || 'weather-city'}.png`, { type: 'image/png' });
         
+        const shareText = city && temperature !== undefined 
+            ? `Check out the weather in ${city}: ${Math.round(temperature)}°C!\nhttps://mineclimate.lovable.app` 
+            : `Check out this beautiful weather city image!\nhttps://mineclimate.lovable.app`;
         await navigator.share({
           title: city ? `Weather in ${city}` : 'Weather City',
-          text: city && temperature !== undefined 
-            ? `Check out the weather in ${city}: ${Math.round(temperature)}°C!` 
-            : 'Check out this beautiful weather city image!',
+          text: shareText,
           files: [file],
         });
       } else {
