@@ -379,7 +379,7 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
       
       {/* Weather effects overlay - outside pinch container for proper z-index */}
       {imageUrl && (
-        <WeatherEffects condition={condition} isVisible={imageLoaded && scale < 1.5} imageBounds={imageBounds} />
+        <WeatherEffects condition={condition} temperature={temperature} isVisible={imageLoaded && scale < 1.5} imageBounds={imageBounds} />
       )}
       
       {isGenerating && imageUrl && (

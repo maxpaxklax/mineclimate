@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 
 interface WeatherEffectsProps {
   condition?: 'sunny' | 'rainy' | 'snowy' | 'overcast';
+  temperature?: number;
   isVisible: boolean;
   imageBounds?: { left: number; width: number } | null;
 }
@@ -61,7 +62,7 @@ function BirdSVG({ className, style, flapDuration }: { className?: string; style
 }
 
 
-export function WeatherEffects({ condition, isVisible, imageBounds }: WeatherEffectsProps) {
+export function WeatherEffects({ condition, temperature, isVisible, imageBounds }: WeatherEffectsProps) {
   const rainDrops = useMemo(() => generateParticles(30, 42), []);
   const snowflakes = useMemo(() => generateParticles(25, 73), []);
   const birds = useMemo(() => generateBirds(3, 89), []);
@@ -70,6 +71,21 @@ export function WeatherEffects({ condition, isVisible, imageBounds }: WeatherEff
 
   return (
     <div className="absolute inset-0 z-[15] pointer-events-none overflow-hidden">
+
+      {/* Heat shimmer effect - extreme heat (>=38°C) */}
+      {typeof temperature === 'number' && temperature >= 38 && imageBounds && (
+        <div
+          className="absolute inset-y-0 animate-heat-shimmer mix-blend-overlay"
+          style={{
+            left: imageBounds.left,
+            width: imageBounds.width,
+            background:
+              'repeating-linear-gradient(0deg, rgba(255,180,80,0.10) 0px, rgba(255,220,140,0.05) 2px, rgba(255,160,60,0.12) 4px, rgba(255,200,100,0.04) 6px)',
+            filter: 'blur(1px)',
+          }}
+        />
+      )}
+
 
       {/* Animated birds - show for sunny and overcast, constrained to image bounds */}
       {(condition === 'sunny' || condition === 'overcast') && imageBounds && (
