@@ -285,3 +285,28 @@
     }
   }
 }
+
+  .animate-heat-shimmer {
+    animation: heat-shimmer 2.4s ease-in-out infinite;
+    will-change: transform, opacity;
+  }
+
+  @keyframes heat-shimmer {
+    0%, 100% {
+      transform: translateY(0) skewY(0deg);
+      opacity: 0.55;
+    }
+    25% {
+      transform: translateY(-2px) skewY(0.4deg);
+      opacity: 0.75;
+    }
+    50% {
+      transform: translateY(1px) skewY(-0.3deg);
+      opacity: 0.5;
+    }
+    75% {
+      transform: translateY(-1px) skewY(0.2deg);
+      opacity: 0.7;
+    }
+  }
+
