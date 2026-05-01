@@ -233,9 +233,15 @@ export function SearchBar({ onSelectLocation, onRefresh, imageUrl, isLoading, ci
       if (navigator.share) {
         const file = new File([blob], `${city || 'weather-city'}.png`, { type: 'image/png' });
         
+        const conditionEmoji = condition === 'sunny' ? '☀️'
+          : condition === 'rainy' ? '🌧️'
+          : condition === 'snowy' ? '❄️'
+          : condition === 'overcast' ? '☁️'
+          : '';
+        const emojiPrefix = conditionEmoji ? `${conditionEmoji} ` : '';
         const shareText = city && temperature !== undefined 
-            ? `Check out the weather in ${city}: ${Math.round(temperature)}°C!\nhttps://mineclimate.lovable.app` 
-            : `Check out this beautiful weather city image!\nhttps://mineclimate.lovable.app`;
+            ? `${emojiPrefix}Check out the weather in ${city}: ${Math.round(temperature)}°C!\nhttps://mineclimate.lovable.app` 
+            : `${emojiPrefix}Check out this beautiful weather city image!\nhttps://mineclimate.lovable.app`;
         await navigator.share({
           title: city ? `Weather in ${city}` : 'Weather City',
           text: shareText,
