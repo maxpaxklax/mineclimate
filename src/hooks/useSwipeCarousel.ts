@@ -3,9 +3,10 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 interface UseSwipeCarouselOptions {
   totalSlides: number;
   onSnapBack?: () => void;
+  disabled?: boolean;
 }
 
-export function useSwipeCarousel({ totalSlides, onSnapBack }: UseSwipeCarouselOptions) {
+export function useSwipeCarousel({ totalSlides, onSnapBack, disabled = false }: UseSwipeCarouselOptions) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [swipeOffset, setSwipeOffset] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -26,16 +27,16 @@ export function useSwipeCarousel({ totalSlides, onSnapBack }: UseSwipeCarouselOp
   }, [totalSlides]);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    if (isAnimating) return;
+    if (isAnimating || disabled) return;
     const touch = e.touches[0];
     touchStartX.current = touch.clientX;
     touchStartY.current = touch.clientY;
     isSwiping.current = false;
     isVerticalScroll.current = false;
-  }, [isAnimating]);
+  }, [isAnimating, disabled]);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (isAnimating || isVerticalScroll.current) return;
+    if (isAnimating || isVerticalScroll.current || disabled) return;
     const touch = e.touches[0];
     const deltaX = touch.clientX - touchStartX.current;
     const deltaY = touch.clientY - touchStartY.current;
@@ -63,9 +64,14 @@ export function useSwipeCarousel({ totalSlides, onSnapBack }: UseSwipeCarouselOp
     }
 
     setSwipeOffset(adjustedDelta);
-  }, [isAnimating, currentIndex, totalSlides]);
+  }, [isAnimating, currentIndex, totalSlides, disabled]);
 
   const handleTouchEnd = useCallback(() => {
+    if (disabled) {
+      isSwiping.current = false;
+      setSwipeOffset(0);
+      return;
+    }
     if (!isSwiping.current || isAnimating) {
       setSwipeOffset(0);
       return;
@@ -102,7 +108,7 @@ export function useSwipeCarousel({ totalSlides, onSnapBack }: UseSwipeCarouselOp
     }
 
     isSwiping.current = false;
-  }, [swipeOffset, currentIndex, totalSlides, isAnimating, onSnapBack]);
+  }, [swipeOffset, currentIndex, totalSlides, isAnimating, onSnapBack, disabled]);
 
   const goTo = useCallback((index: number) => {
     if (isAnimating || index === currentIndex) return;

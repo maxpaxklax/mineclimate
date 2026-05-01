@@ -12,6 +12,7 @@ interface CityImageProps {
   temperature?: number;
   condition?: 'sunny' | 'rainy' | 'snowy' | 'overcast';
   onImageBoundsChange?: (bounds: { left: number; width: number } | null) => void;
+  onZoomChange?: (isZoomed: boolean) => void;
 }
 
 const weatherIcons = {
@@ -76,7 +77,7 @@ function sampleEdgeColors(img: HTMLImageElement): EdgeColors {
   };
 }
 
-export function CityImage({ imageUrl, isGenerating, city, temperature, condition, onImageBoundsChange }: CityImageProps) {
+export function CityImage({ imageUrl, isGenerating, city, temperature, condition, onImageBoundsChange, onZoomChange }: CityImageProps) {
   const [edgeColors, setEdgeColors] = useState<EdgeColors | null>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -92,6 +93,19 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
   const initialTranslate = useRef({ x: 0, y: 0 });
   const initialCenter = useRef({ x: 0, y: 0 });
   const lastTouch = useRef<{ x: number; y: number } | null>(null);
+
+  // Notify parent when zoom state changes
+  useEffect(() => {
+    onZoomChange?.(scale > 1);
+  }, [scale, onZoomChange]);
+
+  // Reset zoom when image changes
+  useEffect(() => {
+    setScale(1);
+    setTranslate({ x: 0, y: 0 });
+    initialDistance.current = null;
+    lastTouch.current = null;
+  }, [imageUrl]);
 
   const getDistance = (touches: React.TouchList) => {
     const touch1 = touches.item(0);
@@ -310,6 +324,7 @@ export function CityImage({ imageUrl, isGenerating, city, temperature, condition
           }}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchEnd}
         >
           <img
             ref={imgRef}
