@@ -153,14 +153,13 @@
 
   .animate-rain-fall {
     animation: rain-fall linear infinite;
+    animation-fill-mode: backwards;
+    top: -10%;
   }
 
   @keyframes rain-fall {
     0% {
-      top: -5%;
-      opacity: 0;
-    }
-    10% {
+      top: -10%;
       opacity: 1;
     }
     90% {
@@ -174,16 +173,15 @@
 
   .animate-snow-fall {
     animation: snow-fall ease-in-out infinite;
+    animation-fill-mode: backwards;
+    top: -10%;
   }
 
   @keyframes snow-fall {
     0% {
-      top: -5%;
-      opacity: 0;
-      transform: translateX(0);
-    }
-    10% {
+      top: -10%;
       opacity: 0.8;
+      transform: translateX(0);
     }
     50% {
       transform: translateX(20px);
