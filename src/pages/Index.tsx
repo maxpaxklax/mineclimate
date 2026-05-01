@@ -110,6 +110,11 @@ const Index = () => {
 
   const activeSlide = slides[carousel.currentIndex];
 
+  // Reset zoom flag when switching slides; the new active CityImage will report its own state
+  useEffect(() => {
+    setIsImageZoomed(false);
+  }, [carousel.currentIndex]);
+
   const generateImage = useCallback(async (loc: LocationData, w: WeatherData) => {
     setIsGenerating(true);
     
