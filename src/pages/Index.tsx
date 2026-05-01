@@ -68,6 +68,7 @@ const Index = () => {
   const [showPermission, setShowPermission] = useState(false);
   const [imageBounds, setImageBounds] = useState<{ left: number; width: number } | null>(null);
   const [savedCities, setSavedCities] = useState<SavedCity[]>([]);
+  const [isImageZoomed, setIsImageZoomed] = useState(false);
 
   // Refresh saved cities list
   const refreshSavedCities = useCallback(() => {
@@ -101,6 +102,7 @@ const Index = () => {
 
   const carousel = useSwipeCarousel({
     totalSlides: slides.length,
+    disabled: isImageZoomed,
     onSnapBack: () => {
       toast('Back to your current city!', { icon: '📍', duration: 1500 });
     },
@@ -371,6 +373,7 @@ const Index = () => {
                 temperature={slide.temperature}
                 condition={slide.condition}
                 onImageBoundsChange={i === carousel.currentIndex ? setImageBounds : undefined}
+                onZoomChange={i === carousel.currentIndex ? setIsImageZoomed : undefined}
               />
             </div>
           ))}
