@@ -25,12 +25,12 @@ function getTimePeriod(hour: number): TimePeriod {
 }
 
 const lightingDescriptions: Record<TimePeriod, string> = {
-  dawn: 'during dawn with soft pink-orange sunrise glow on the horizon, long shadows, sky transitioning from deep blue to warm pastels',
-  morning: 'during morning with fresh warm morning light, low-angle golden sun, gentle shadows, crisp clear atmosphere',
-  midday: 'during midday with bright overhead sunlight, short shadows, vivid saturated colors',
-  golden_hour: 'during golden hour with warm golden light, long dramatic shadows, rich amber and orange tones, sun low on horizon',
-  dusk: 'during dusk with twilight sky showing deep purple and orange gradients, city lights beginning to glow, fading daylight',
-  night: 'at night with dark sky with stars and moon, city illuminated by warm streetlights and glowing windows, cool blue shadows, neon reflections',
+  dawn: 'at dawn, with long shadows and the sky transitioning from deep blue to warm pastels on the horizon',
+  morning: 'in the morning, with low-angle light and gentle shadows',
+  midday: 'at midday, with short shadows and overhead light',
+  golden_hour: 'during golden hour, with warm tones, long dramatic shadows, and the sun low on the horizon',
+  dusk: 'at dusk, with a twilight sky and city lights beginning to glow',
+  night: 'at night, with a dark sky, stars and moon, city illuminated by warm streetlights and glowing windows, cool blue shadows',
 };
 
 // Cities with metro/subway systems (normalized to lowercase for matching)
@@ -128,10 +128,10 @@ serve(async (req) => {
 
     // Build the prompt based on weather condition - descriptions are time-neutral to avoid conflicting with lighting
     const weatherDescriptions = {
-      sunny: 'clear skies, vibrant saturated colors, cheerful atmosphere',
-      rainy: 'dramatic clouds, rain drops falling, wet reflective streets, puddles, umbrellas, rich deep colors',
-      snowy: 'snow-covered rooftops, falling snowflakes, cozy warm glowing lights in windows, pristine white snow',
-      overcast: 'cloudy overcast sky with soft diffused light, grey clouds, subtle muted tones, calm peaceful atmosphere',
+      sunny: 'clear skies and a cheerful atmosphere',
+      rainy: 'dramatic clouds, falling rain drops, wet reflective streets, puddles, and umbrellas',
+      snowy: 'snow-covered rooftops, falling snowflakes, and pristine white snow',
+      overcast: 'a cloudy overcast sky with soft diffused light, grey clouds, and a calm muted atmosphere',
     };
 
     const undergroundLayer = cityHasSubway
